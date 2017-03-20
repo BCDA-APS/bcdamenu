@@ -4,10 +4,11 @@
 BcdaMenu: Creates a GUI menu button to start common beam line software
 '''
 
+import datetime
 import os
 import sys
 # TODO: import argparse
-from PyQt4.QtGui import *       # QWidget, QLabel, QLineEdit, QGridLayout, QApplication, QPushButton
+from PyQt4.QtGui import *
 from functools import partial
 import subprocess
 
@@ -57,8 +58,14 @@ class MainButtonWindow(QWidget):
         self.setWindowTitle(self.config.get('title', 'BCDA Menu'))
     
     def receiver(self, label, command):
-        print(label, os.path.normpath(command))
-        # TODO: subprocess.Popen(cmd, shell = True)
+        '''handle commands from menu button'''
+        command = os.path.normpath(command)
+        msg = 'BcdaMenu (' 
+        msg += str(datetime.datetime.now())
+        msg += '), ' + label
+        msg += ':  ' + command
+        print(msg)
+        subprocess.Popen(command, shell = True)
     
     def about_box(self):
         '''TODO: should display an About box'''
@@ -66,6 +73,7 @@ class MainButtonWindow(QWidget):
 
 
 def gui():
+    '''display the main widget'''
     app = QApplication(sys.argv)
     probe = MainButtonWindow()
     probe.show()
@@ -73,8 +81,8 @@ def gui():
 
 
 def main():
+    '''process any command line options before starting the GUI'''
     gui()
-    # raise NotImplementedError('this program is under development')
 
 
 if __name__ == '''__main__''':
