@@ -14,7 +14,7 @@ Production
 Development
 ***********
 
-:2017.3.0:
+:2017.3.0rc1:
 
     * `#3 <https://github.com/prjemian/spec2nexus/issues/3>`_
       generalize using a `settings.ini` file
