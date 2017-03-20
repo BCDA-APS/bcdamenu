@@ -14,6 +14,15 @@ Production
 Development
 ***********
 
+:2017.3.0:
+
+    * `#3 <https://github.com/prjemian/spec2nexus/issues/3>`_
+      generalize using a `settings.ini` file
+    * `#2 <https://github.com/prjemian/spec2nexus/issues/2>`_
+      use PyQt4
+    * `#1 <https://github.com/prjemian/spec2nexus/issues/1>`_
+      manage as eclipse project
+
 :2017-03-20:
 
    * created GitHub repo from `menuUSAXS.py`: https://github.com/BCDA-APS/bcdamenu
