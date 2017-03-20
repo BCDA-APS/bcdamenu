@@ -15,7 +15,7 @@ Package Information
 * **author**    Pete R. Jemian
 * **email**     prjemian@gmail.com
 * **copyright** 2017-, Pete R. Jemian
-* **license**   ANL OPEN SOURCE LICENSE (see ![LICENSE](src/bcdamenu/LICENSE.txt))
+* **license**   ANL OPEN SOURCE LICENSE (see [LICENSE](https://raw.githubusercontent.com/BCDA-APS/bcdamenu/master/src/bcdamenu/LICENSE.txt))
 * **URL**       documentation: http://bcdamenu.readthedocs.io
 * **git**       source: https://github.com/BCDA-APS/bcdamenu
 * **PyPI**      Distribution: https://pypi.python.org/pypi/bcdamenu/ 
