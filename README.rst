@@ -21,12 +21,12 @@ Package Information
 * **PyPI**      Distribution: https://pypi.python.org/pypi/bcdamenu/ 
 
 * **release badges**
-.. image:: https://img.shields.io/github/tag/BCDA-APS/bcdamenu.svg
-   :target: https://github.com/BCDA-APS/bcdamenu/tags
-.. image:: https://img.shields.io/github/release/BCDA-APS/bcdamenu.svg
-   :target: https://github.com/BCDA-APS/bcdamenu/releases
-.. image:: https://img.shields.io/pypi/v/bcdamenu.svg
-   :target: https://pypi.python.org/pypi/bcdamenu/
-..
-   .. image:: https://anaconda.org/BCDA-APS/bcdamenu/badges/version.svg
-      :target: https://anaconda.org/BCDA-APS/bcdamenu
+   .. image:: https://img.shields.io/github/tag/BCDA-APS/bcdamenu.svg
+      :target: https://github.com/BCDA-APS/bcdamenu/tags
+   .. image:: https://img.shields.io/github/release/BCDA-APS/bcdamenu.svg
+      :target: https://github.com/BCDA-APS/bcdamenu/releases
+   .. image:: https://img.shields.io/pypi/v/bcdamenu.svg
+      :target: https://pypi.python.org/pypi/bcdamenu/
+   ..
+      .. image:: https://anaconda.org/BCDA-APS/bcdamenu/badges/version.svg
+         :target: https://anaconda.org/BCDA-APS/bcdamenu
