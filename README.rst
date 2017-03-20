@@ -25,5 +25,6 @@ Provides
       :target: https://github.com/BCDA-APS/bcdamenu/releases
    .. image:: https://img.shields.io/pypi/v/bcdamenu.svg
       :target: https://pypi.python.org/pypi/bcdamenu/
-   .. image:: https://anaconda.org/BCDA-APS/bcdamenu/badges/version.svg
-      :target: https://anaconda.org/BCDA-APS/bcdamenu
+   ..
+      .. image:: https://anaconda.org/BCDA-APS/bcdamenu/badges/version.svg
+         :target: https://anaconda.org/BCDA-APS/bcdamenu
