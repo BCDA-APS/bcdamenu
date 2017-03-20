@@ -44,7 +44,12 @@ setup (
     package_dir      = {'': 'src'},
     packages         = ['bcdamenu', ],
     #packages=find_packages(),
-    package_data     = {},
+    package_data     = {
+         'bcdamenu': [
+            'settings.ini',
+            'LICENSE.txt',
+            ],
+         },
     classifiers      = bcdamenu.__classifiers__,
     entry_points     = {
          # create & install scripts in <python>/bin
