@@ -9,6 +9,9 @@ Provides
 
 * **bcdamenu**       : the button menu
 
+Package Information
+###################
+
 * **author**    Pete R. Jemian
 * **email**     prjemian@gmail.com
 * **copyright** 2017-, Pete R. Jemian
