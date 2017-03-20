@@ -4,6 +4,8 @@
 :release:   |release|
 :published: |today|
 
+NOTE:  This project is just starting aand the documentation is not ready.
+
 Contents
 ========
 
