@@ -9,13 +9,13 @@ Provides
 
 * **bcdamenu**       : the button menu
 
-:author:    Pete R. Jemian
-:email:     prjemian@gmail.com
-:copyright: 2017-, Pete R. Jemian
-:license:   Creative Commons Attribution 4.0 International Public License (see *LICENSE.txt*)
-:URL:       documentation: http://bcdamenu.readthedocs.io
-:git:       source: https://github.com/BCDA-APS/bcdamenu
-:PyPI:      Distribution: https://pypi.python.org/pypi/bcdamenu/ 
+* **author**    Pete R. Jemian
+* **email**     prjemian@gmail.com
+* **copyright** 2017-, Pete R. Jemian
+* **license**   Creative Commons Attribution 4.0 International Public License (see *LICENSE.txt*)
+* **URL**       documentation: http://bcdamenu.readthedocs.io
+* **git**       source: https://github.com/BCDA-APS/bcdamenu
+* **PyPI**      Distribution: https://pypi.python.org/pypi/bcdamenu/ 
 
 :release badges:
       
