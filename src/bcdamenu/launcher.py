@@ -127,17 +127,15 @@ def read_settings(ini_file):
                 settings[menu_name][k] = v
             else:
                 parts = k.split()
-                if parts[0] not in ('command', 'label'):
+                if len(parts) < 2:
                     msg = 'Error in settings file, section [%s]: ' % menu_name + ini_file
                     msg += '\n  line reading: ' + k + ' = ' + v
                     raise KeyError(msg)
-                item = 'key_%04d' % int(parts[1])
-                if parts[0] == 'label':
-                    labels[parts[1]] = v
-                elif parts[0] == 'command':
-                    if v == 'None':
-                        v = None
-                    commands[parts[1]] = v
+                key = 'key_%04d' % int(parts[0])
+                labels[key] = k[k.find(' '):].strip()
+                if len(v) == 0:
+                    v = None
+                commands[key] = v
     
         # add the menu items in numerical order
         for k, label in sorted(labels.items()):
