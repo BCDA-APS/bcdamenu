@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-BCDAmenu: Creates a GUI menu button to start common beam line software
+BcdaMenu: Creates a GUI menu button to start common beam line software
 '''
 
 import datetime
@@ -173,5 +173,5 @@ def main():
 
 
 if __name__ == '''__main__''':
-    sys.argv.append('settings.ini')
+    sys.argv.append('bcdamenu.ini')
     main()
