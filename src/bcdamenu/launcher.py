@@ -18,8 +18,7 @@ except:
     import ConfigParser as iniParser
 
 
-DEFAULT_SECTION_LABEL = 'BCDAmenu'
-MENU_ITEMS_SECTION_LABEL = 'menu_items'
+MAIN_SECTION_LABEL = 'BCDAmenu'
 
 
 class PopupMenuButton(QPushButton):
@@ -54,7 +53,7 @@ class MainButtonWindow(QWidget):
 
         self.admin_popup  = PopupMenuButton('Help...')
         self.admin_popup.addAction('About ...', self.about_box)
-        # TODO: self.admin_popup.addAction('show log window')
+        # TODO: self.admin_popup.addAction('show log window') (issue #14)
         # TODO: edit settings file (issue #10)
         # TODO: reload settings file (issue #11)
 
@@ -100,6 +99,7 @@ class MainButtonWindow(QWidget):
     
     def about_box(self):
         '''TODO: should display an About box'''
+        # TODO: issue #13
         print(__doc__)
 
 
@@ -111,7 +111,7 @@ def read_settings(ini_file):
     config.read(ini_file)
     
     settings = dict(title='BcdaMenu', menus='', version='unknown')
-    for k, v in config.items(DEFAULT_SECTION_LABEL):
+    for k, v in config.items(MAIN_SECTION_LABEL):
         settings[k] = v
     settings['menus'] = settings['menus'].split()
 
@@ -132,10 +132,15 @@ def read_settings(ini_file):
                     msg += '\n  line reading: ' + k + ' = ' + v
                     raise KeyError(msg)
                 key = 'key_%04d' % int(parts[0])
-                labels[key] = k[k.find(' '):].strip()
-                if len(v) == 0:
-                    v = None
-                commands[key] = v
+                label = k[k.find(' '):].strip()
+                if label == 'submenu':   # TODO: support submenus issue #12
+                    labels[key] = label + ': planned feature #12'
+                    commands[key] = None
+                else:
+                    labels[key] = label
+                    if len(v) == 0:
+                        v = None
+                    commands[key] = v
     
         # add the menu items in numerical order
         for k, label in sorted(labels.items()):
