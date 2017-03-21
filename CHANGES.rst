@@ -14,6 +14,8 @@ Production
 Development
 ***********
 
+:2017.3.0rc2: packaging & documentation
+
 :2017.3.0rc1:
 
     * `#3 <https://github.com/prjemian/spec2nexus/issues/3>`_
