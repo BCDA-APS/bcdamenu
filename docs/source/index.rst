@@ -14,6 +14,7 @@ Contents
    :glob:
 
    settings
+   install
    source_code/*
    license
 
