@@ -13,7 +13,7 @@ Package Information
 ###################
 
 * **author**    : Pete R. Jemian
-* **email**     : prjemian@gmail.com
+* **email**     : jemian@anl.gov
 * **copyright** : 2017-, Pete R. Jemian
 * **license**   : ANL OPEN SOURCE LICENSE (see `LICENSE.txt <http://BcdaMenu.readthedocs.io/en/latest/license.html>`_ file)
 * **URL**       : documentation: http://bcdamenu.readthedocs.io
