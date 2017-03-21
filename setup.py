@@ -46,7 +46,7 @@ setup (
     #packages=find_packages(),
     package_data     = {
          'bcdamenu': [
-            'settings.ini',
+            'bcdamenu.ini',
             'LICENSE.txt',
             ],
          },
