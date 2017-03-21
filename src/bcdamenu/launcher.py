@@ -18,8 +18,25 @@ except:
     import ConfigParser as iniParser
 
 
-DEFAULT_SECTION_LABEL = 'DEFAULT'
-MENU_ITEMS_SECTION_LABEL = 'menu_items'
+MAIN_SECTION_LABEL = 'BCDAmenu'
+
+
+class PopupMenuButton(QPushButton):
+    '''
+    a QPushButton that provides a popup menu
+    '''
+    
+    def __init__(self, button_name, *args, **kwargs):
+        QPushButton.__init__(self, *args, **kwargs)
+        self.setText(button_name)
+        self.menu = QMenu()
+        self.setMenu(self.menu)
+    
+    def addAction(self, text, action):
+        self.menu.addAction(text, action)
+    
+    def addSeparator(self):
+        self.menu.addSeparator()
 
 
 class MainButtonWindow(QWidget):
@@ -28,31 +45,43 @@ class MainButtonWindow(QWidget):
     def __init__(self, parent=None, config=None):
         QWidget.__init__(self, parent)
         self.config = config or {}
-
-        self.popup  = QPushButton('Commands...')
-        self.menu   = QMenu()
-        self.popup.setMenu(self.menu)
         
-        # fallback to empty dictionary if not found
-        config_dict = self.config.get(MENU_ITEMS_SECTION_LABEL, {})
-        for k, v in config_dict.items():
-            if k == 'separator' and v is None:
-                self.menu.addSeparator()
-            else:
-                action = self.menu.addAction(k, partial(self.receiver, k, v))
-
-        self.admin_popup  = QPushButton('Help...')
-        self.admin_menu   = QMenu()
-        self.admin_popup.setMenu(self.admin_menu)
-        self.admin_menu.addAction('About ...', self.about_box)
-        # TODO: self.admin_menu.addAction('show log window')
-
+        self.user_popups = OrderedDict()
         layout = QHBoxLayout()
-        layout.addWidget(self.popup)
+
+        self.layout_user_menus(self.config, layout)
+
+        self.admin_popup  = PopupMenuButton('Help...')
+        self.admin_popup.addAction('About ...', self.about_box)
+        # TODO: self.admin_popup.addAction('show log window') (issue #14)
+        # TODO: edit settings file (issue #10)
+        # TODO: reload settings file (issue #11)
+
         layout.addWidget(self.admin_popup)
 
         self.setLayout(layout)
         self.setWindowTitle(self.config.get('title', 'BCDA Menu'))
+    
+    def layout_user_menus(self, config, layout):
+        '''
+        '''
+        for menu_name in config['menus']:
+            popup = PopupMenuButton(menu_name)
+            self.user_popups[menu_name] = popup
+
+            title = config[menu_name].get('title', None)
+            if title is not None:
+                popup.setText(title)
+                del config[menu_name]['title']
+
+            # fallback to empty dictionary if not found
+            config_dict = config.get(menu_name, {})
+            for k, v in config_dict.items():
+                if k == 'separator' and v is None:
+                    popup.addSeparator()
+                else:
+                    action = popup.addAction(k, partial(self.receiver, k, v))
+            layout.addWidget(popup)
     
     def receiver(self, label, command):
         '''handle commands from menu button'''
@@ -70,7 +99,54 @@ class MainButtonWindow(QWidget):
     
     def about_box(self):
         '''TODO: should display an About box'''
+        # TODO: issue #13
         print(__doc__)
+
+
+def read_settings(ini_file):
+    '''
+    read the user menu settings from the .ini file
+    '''
+    config = iniParser.ConfigParser(allow_no_value=True)
+    config.read(ini_file)
+    
+    settings = dict(title='BcdaMenu', menus='', version='unknown')
+    for k, v in config.items(MAIN_SECTION_LABEL):
+        settings[k] = v
+    settings['menus'] = settings['menus'].split()
+
+    for menu_name in settings['menus']:
+        settings[menu_name] = OrderedDict()
+
+        # parse the settings file and coordinate numbered labels with commands
+        labels = {}
+        commands = {}
+        menu_items_dict = dict(config.items(menu_name))
+        for k, v in menu_items_dict.items():
+            if k == 'title':
+                settings[menu_name][k] = v
+            else:
+                parts = k.split()
+                if len(parts) < 2:
+                    msg = 'Error in settings file, section [%s]: ' % menu_name + ini_file
+                    msg += '\n  line reading: ' + k + ' = ' + v
+                    raise KeyError(msg)
+                key = 'key_%04d' % int(parts[0])
+                label = k[k.find(' '):].strip()
+                if label == 'submenu':   # TODO: support submenus issue #12
+                    labels[key] = label + ': planned feature #12'
+                    commands[key] = None
+                else:
+                    labels[key] = label
+                    if len(v) == 0:
+                        v = None
+                    commands[key] = v
+    
+        # add the menu items in numerical order
+        for k, label in sorted(labels.items()):
+            settings[menu_name][label] = commands[k]
+    
+    return settings
 
 
 def gui(config = None):
@@ -92,38 +168,10 @@ def main():
     if not os.path.exists(params.settingsfile):
         raise IOError('file not found: ' + params.settingsfile)
 
-    config = iniParser.ConfigParser(allow_no_value=True)
-    config.read(params.settingsfile)
-    
-    settings = dict(title='BcdaMenu', menu_items=OrderedDict())
-    for k, v in config.items(DEFAULT_SECTION_LABEL):
-        settings[k] = v
-
-    # parse the settings file and coordinate numbered labels with commands
-    labels = {}
-    commands = {}
-    menu_items_dict = dict(config.items(MENU_ITEMS_SECTION_LABEL))
-    for k, v in menu_items_dict.items():
-        if k == 'title': continue
-        parts = k.split()
-        if parts[0] not in ('command', 'label'):
-            msg = 'Error in settings file, section [menu_items]: ' + params.settingsfile
-            msg += '\n  line reading: ' + k + ' = ' + v
-            raise KeyError(msg)
-        item = 'key_%04d' % int(parts[1])
-        if parts[0] == 'label':
-            labels[parts[1]] = v
-        elif parts[0] == 'command':
-            if v == 'None':
-                v = None
-            commands[parts[1]] = v
-    
-    # add the menu items in numerical order
-    for k, label in sorted(labels.items()):
-        settings[MENU_ITEMS_SECTION_LABEL][label] = commands[k]
-
+    settings = read_settings(params.settingsfile)
     gui(config = settings)
 
 
 if __name__ == '''__main__''':
+    sys.argv.append('bcdamenu.ini')
     main()

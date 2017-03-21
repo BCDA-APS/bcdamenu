@@ -2,4 +2,4 @@ include README.rst
 include versioneer.py
 include src/bcdamenu/LICENSE.txt
 include src/bcdamenu/_version.py
-include src/bcdamenu/settings.ini
+include src/bcdamenu/bcdamenu.ini
