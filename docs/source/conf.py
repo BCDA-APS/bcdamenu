@@ -36,6 +36,10 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.inheritance_diagram',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,7 +61,7 @@ master_doc = 'index'
 # General information about the project.
 project = bcdamenu.__package_name__
 copyright = bcdamenu.__copyright__
-author = u'P Jemian'
+author = bcdamenu.__author__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
