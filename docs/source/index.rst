@@ -11,6 +11,11 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :glob:
+
+   settings
+   source_code/*
+   license
 
 
 
