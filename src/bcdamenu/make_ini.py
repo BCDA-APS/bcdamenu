@@ -29,6 +29,8 @@ USAXS_CONFIG = {
 config = iniParser.ConfigParser()
 #config.read(INI_FILE)
 config.set(launcher.DEFAULT_SECTION_LABEL, 'title', USAXS_CONFIG['title'])
+config.set(launcher.DEFAULT_SECTION_LABEL, 'version', '2017.3.0')
+config.set(launcher.DEFAULT_SECTION_LABEL, 'menus', ' '.join([launcher.MENU_ITEMS_SECTION_LABEL,]))
 config.add_section(launcher.MENU_ITEMS_SECTION_LABEL)
 for index, k in enumerate(USAXS_CONFIG[launcher.MENU_ITEMS_SECTION_LABEL].keys()):
     v = USAXS_CONFIG[launcher.MENU_ITEMS_SECTION_LABEL][k]
