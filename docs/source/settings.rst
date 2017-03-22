@@ -168,3 +168,24 @@ This is the *linux* menu:
 .. figure:: art/settings_2017_3_0/linux-menu-dropped.png
 
    GUI using example settings file, showing the *linux* menu.
+
+.. _Help:
+
+The "Help" popup menu button
+############################
+
+The *Help* popup menu button is controlled by the program and is not configurable
+by the user through the settings file.
+
+This is the *Help* menu:
+
+.. _example_gui.help_menu:
+
+.. figure:: art/help-menu-dropped.png
+
+   GUI showing the *Help* menu.
+
+These items are available in the *Help* popup menu:
+
+* *About ...* : prints to the console basic information about this program
+* *Reload User Menus* : reloads the settings file (use this when editing/revising that file)
