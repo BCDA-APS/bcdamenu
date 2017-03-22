@@ -7,9 +7,9 @@ Change History
 Production
 **********
 
-:tba:
+:2017.3.0:
 
-   * initial release: https://github.com/BCDA-APS/bcdamenu/milestone/1
+   * initial release: 2017.03.21
 
 Development
 ***********
