@@ -18,7 +18,7 @@ except:
     import ConfigParser as iniParser
 
 
-MAIN_SECTION_LABEL = 'BCDAmenu'
+MAIN_SECTION_LABEL = 'BcdaMenu'
 
 
 class PopupMenuButton(QPushButton):
@@ -173,5 +173,4 @@ def main():
 
 
 if __name__ == '''__main__''':
-    sys.argv.append('bcdamenu.ini')
     main()
