@@ -12,7 +12,12 @@ when starting the program.  For example, this Linux command::
 
     bcdamenu path/to/menus_settings.ini &
 
-The settings file uses the `.ini` format, 
+Version 2017.3.0
+****************
+
+.. index:: settings file; version 2017.3.0
+
+The settings file version `2017.3.0` uses the `.ini` format, 
 a structure similar to what you would find 
 in Microsoft Windows INI files.  This format was
 chosen for its minimal approach to language markup.
@@ -24,7 +29,7 @@ The `web <https://en.wikipedia.org/wiki/INI_file>`_
 has many explanations of this informal format.
 
 Settings file elements
-**********************
+======================
 
 The settings file consists of sections which are lines
 starting with `[` and ending with `]`.  In **BcdaMenu**,
@@ -56,7 +61,7 @@ section for an example settings file.
 :other sections: will be ignored
 
 Menu Sections
-=============
+-------------
 
 Each popup menu is configured by the keys and values of a 
 menu section.
@@ -88,14 +93,14 @@ menu section.
       in the background.
 
 Shortcut keys
-=============
+-------------
 
 Shortcut keys are not supported for any menu items.
 
 .. _example.settings.file:
 
 Example Settings File
-*********************
+=====================
 
 .. index:: 
    settings file; example
@@ -107,7 +112,7 @@ is an example demonstrating the various
 features used by **BcdaMenu**.
 
 file
-====
+----
 
 The example settings file (highlighted lines show the 
 sections, lines 1, 6, & 18 and the specification of 
@@ -121,7 +126,7 @@ on line 22) is an unimplemented feature at this time.
    :emphasize-lines: 1,4,6,18,22
 
 screens
-=======
+-------
 
 This settings file produces a GUI titled *9-ID-C USAXS menu*
 with two user menus: *USAXS* and *linux*.  The following
@@ -129,7 +134,7 @@ screen views are from an early version, running on MS Windows.
 
 .. _example_gui:
 
-.. figure:: art/gui.png
+.. figure:: art/settings_2017_3_0/gui.png
 
    GUI using example settings file.
 
@@ -137,7 +142,7 @@ This is the *USAXS* menu:
 
 .. _example_gui.usaxs_menu:
 
-.. figure:: art/usaxs-menu-dropped.png
+.. figure:: art/settings_2017_3_0/usaxs-menu-dropped.png
 
    GUI using example settings file, showing the *USAXS* menu.
 
@@ -145,6 +150,6 @@ This is the *linux* menu:
 
 .. _example_gui.linux_menu:
 
-.. figure:: art/linux-menu-dropped.png
+.. figure:: art/settings_2017_3_0/linux-menu-dropped.png
 
    GUI using example settings file, showing the *linux* menu.
