@@ -53,6 +53,7 @@ Contents
    settings
    install
    source_code/*
+   changes
    license
 
 
