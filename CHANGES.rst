@@ -14,7 +14,12 @@ Production
 Development
 ***********
 
-:2017.3.0rc3: milestone reached, test initial release 
+:2017.3.0rc3: 
+
+    * `#9 <https://github.com/prjemian/spec2nexus/issues/9>`_
+      settings file refactored
+    * `#8 <https://github.com/prjemian/spec2nexus/issues/8>`_
+      settings file has a version number now
 
 :2017.3.0rc2: packaging & documentation
 
