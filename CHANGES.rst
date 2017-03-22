@@ -14,6 +14,8 @@ Production
 Development
 ***********
 
+:2017.3.0rc3: milestone reached, test initial release 
+
 :2017.3.0rc2: packaging & documentation
 
 :2017.3.0rc1:
