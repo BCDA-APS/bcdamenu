@@ -69,15 +69,13 @@ class MainButtonWindow(QWidget):
             popup = PopupMenuButton(menu_name)
             self.user_popups[menu_name] = popup
 
-            title = config[menu_name].get('title', None)
-            if title is not None:
-                popup.setText(title)
-                del config[menu_name]['title']
-
-            # fallback to empty dictionary if not found
-            config_dict = config.get(menu_name, {})
-            for k, v in config_dict.items():
-                if k == 'separator' and v is None:
+            # fallback to empty list if not found
+            config_list = config.get(menu_name, [])
+            for entry in config_list:
+                k, v = entry
+                if k == 'title':
+                    popup.setText(v)
+                elif k == 'separator' and v is None:
                     popup.addSeparator()
                 else:
                     action = popup.addAction(k, partial(self.receiver, k, v))
@@ -117,7 +115,7 @@ def read_settings(ini_file):
     settings['menus'] = settings['menus'].split()
 
     for menu_name in settings['menus']:
-        settings[menu_name] = OrderedDict()
+        settings[menu_name] = []
 
         # parse the settings file and coordinate numbered labels with commands
         labels = {}
@@ -125,7 +123,7 @@ def read_settings(ini_file):
         menu_items_dict = dict(config.items(menu_name))
         for k, v in menu_items_dict.items():
             if k == 'title':
-                settings[menu_name][k] = v
+                settings[menu_name].append([k, v])
             else:
                 parts = k.split()
                 if len(parts) < 2:
@@ -145,7 +143,7 @@ def read_settings(ini_file):
     
         # add the menu items in numerical order
         for k, label in sorted(labels.items()):
-            settings[menu_name][label] = commands[k]
+            settings[menu_name].append([label, commands[k]])
     
     return settings
 

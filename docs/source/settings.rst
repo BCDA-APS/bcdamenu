@@ -83,6 +83,9 @@ menu section.
       NOTE: `submenu` is a special label for a feature
       yet to be supported.  The value defines the name of the 
       submenu section to insert at this position in the menu.
+      
+      * `title` is reserved word and cannot be used as a menu item label
+      * `separator` is reserved word and cannot be used as a menu item label
    
    :command: Operating system command to be executed when menu 
       item is chosen.  This is a complete command in the operating
@@ -115,15 +118,15 @@ file
 ----
 
 The example settings file (highlighted lines show the 
-sections, lines 1, 6, & 18 and the specification of 
+sections, lines 1, 6, & 19 and the specification of 
 the popup menus, line 4) is shown next.  Note that the
 submenu (referenced on line 16 with content specified
-on line 22) is an unimplemented feature at this time.
+on line 23) is an unimplemented feature at this time.
 
 .. literalinclude:: ../../src/bcdamenu/bcdamenu.ini
    :language: ini
    :linenos:
-   :emphasize-lines: 1,4,6,18,22
+   :emphasize-lines: 1,4,6,19,23
 
 screens
 -------
