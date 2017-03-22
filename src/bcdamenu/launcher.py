@@ -65,7 +65,7 @@ class MainButtonWindow(QWidget):
     def layout_user_menus(self, config, layout):
         '''
         '''
-        for menu_name in config['menus']:
+        for menu_name in reversed(config['menus']):
             popup = PopupMenuButton(menu_name)
             self.user_popups[menu_name] = popup
 
@@ -79,7 +79,7 @@ class MainButtonWindow(QWidget):
                     popup.addSeparator()
                 else:
                     action = popup.addAction(k, partial(self.receiver, k, v))
-            layout.addWidget(popup)
+            layout.insertWidget(0, popup)
     
     def receiver(self, label, command):
         '''handle commands from menu button'''
