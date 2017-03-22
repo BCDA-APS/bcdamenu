@@ -53,9 +53,10 @@ setup (
     classifiers      = bcdamenu.__classifiers__,
     entry_points     = {
          # create & install scripts in <python>/bin
-         # 'console_scripts': [],
-         'gui_scripts': [
+        'console_scripts': [
              'bcdamenu=bcdamenu.launcher:main',
+        ],
+         'gui_scripts': [
 		 ],
     },
 )
