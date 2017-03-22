@@ -42,9 +42,12 @@ class PopupMenuButton(QPushButton):
 class MainButtonWindow(QWidget):
     '''the widget that holds the menu button'''
 
-    def __init__(self, parent=None, config=None):
+    def __init__(self, parent=None, settingsfilename=None):
         QWidget.__init__(self, parent)
-        self.config = config or {}
+        self.settingsfilename = settingsfilename
+        if settingsfilename is None:
+            raise ValueError('settings file name must be given')
+        self.config = read_settings(self.settingsfilename)
         
         self.user_popups = OrderedDict()
         layout = QHBoxLayout()
@@ -105,6 +108,9 @@ def read_settings(ini_file):
     '''
     read the user menu settings from the .ini file
     '''
+    if not os.path.exists(ini_file):
+        raise ValueError('settings file not found: ' + ini_file)
+
     config = iniParser.ConfigParser(allow_no_value=True)
     config.optionxform = str    # do not make labels lower case
     config.read(ini_file)
@@ -148,11 +154,11 @@ def read_settings(ini_file):
     return settings
 
 
-def gui(config = None):
+def gui(settingsfilename = None):
     '''display the main widget'''
     app = QApplication(sys.argv)
-    probe = MainButtonWindow(config=config)
-    probe.show()
+    the_gui = MainButtonWindow(settingsfilename=settingsfilename)
+    the_gui.show()
     sys.exit(app.exec_())
 
 
@@ -167,8 +173,7 @@ def main():
     if not os.path.exists(params.settingsfile):
         raise IOError('file not found: ' + params.settingsfile)
 
-    settings = read_settings(params.settingsfile)
-    gui(config = settings)
+    gui(settingsfilename = params.settingsfile)
 
 
 if __name__ == '''__main__''':
