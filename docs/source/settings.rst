@@ -172,7 +172,7 @@ This is the *linux* menu:
 .. _Help:
 
 The "Help" popup menu button
-############################
+****************************
 
 The *Help* popup menu button is controlled by the program and is not configurable
 by the user through the settings file.
