@@ -32,13 +32,21 @@ Settings file elements
 ======================
 
 The settings file consists of sections which are lines
-starting with `[` and ending with `]`.  In **BcdaMenu**,
+starting with "`[`" and ending with "`]`", such as `[section_name]`.  
+In **BcdaMenu**,
 these sections are single words with no embedded white space.
 
-Refer to the :ref:`Example settings file <example.settings.file>`
-section for an example settings file.
+Within a section, one or more lines are given with the syntax of
+`key = value` (or `key: value`).  It is expected by the `.ini` format that
+any key is unique *within* its section.
 
-:{BcdaMenu] section: This section expects these keys and values.
+Refer to the :ref:`Example settings file <example.settings.file>`
+section for an example settings file.  As the examples show, both `key` and `value`
+are quite flexible strings.  A `key` should not contain either the "`:`"
+or "`=`" separator characters.  The comment characters allowed by the 
+`.ini` format should also be avoided within either `key` or `value` content.
+
+:{BcdaMenu] section: This section expects the following keys and values.
    Other keys and values will be ignored.
 
    :title: The window title (default: *BCDA Menu*)
