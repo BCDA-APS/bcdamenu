@@ -47,25 +47,25 @@ class MainButtonWindow(QWidget):
         self.settingsfilename = settingsfilename
         if settingsfilename is None:
             raise ValueError('settings file name must be given')
-        self.config = read_settings(self.settingsfilename)
         
         self.user_popups = OrderedDict()
-        layout = QHBoxLayout()
+        self.layout = QHBoxLayout()
 
-        self.layout_user_menus(self.config, layout)
-
-        self.admin_popup  = PopupMenuButton('Help...')
+        self.admin_popup  = PopupMenuButton('Help')
         self.admin_popup.addAction('About ...', self.about_box)
+        self.admin_popup.addSeparator()
+        self.admin_popup.addAction('Reload User Menus', self.reload_settings_file)
         # TODO: self.admin_popup.addAction('show log window') (issue #14)
         # TODO: edit settings file (issue #10)
-        # TODO: reload settings file (issue #11)
 
-        layout.addWidget(self.admin_popup)
+        self.reload_settings_file()
 
-        self.setLayout(layout)
+        self.layout.addWidget(self.admin_popup)
+
+        self.setLayout(self.layout)
         self.setWindowTitle(self.config.get('title', 'BCDA Menu'))
     
-    def layout_user_menus(self, config, layout):
+    def layout_user_menus(self, config):
         '''
         '''
         for menu_name in reversed(config['menus']):
@@ -82,7 +82,7 @@ class MainButtonWindow(QWidget):
                     popup.addSeparator()
                 else:
                     action = popup.addAction(k, partial(self.receiver, k, v))
-            layout.insertWidget(0, popup)
+            self.layout.insertWidget(0, popup)
     
     def receiver(self, label, command):
         '''handle commands from menu button'''
@@ -102,6 +102,19 @@ class MainButtonWindow(QWidget):
         '''TODO: should display an About box'''
         # TODO: issue #13
         print(__doc__)
+    
+    def reload_settings_file(self):
+        '''(re)load the settings file and (re)create the popup button(s)'''
+        # remove the existing popup menu buttons
+        while self.layout.count() > 1:
+            widget = self.layout.takeAt(0)
+            self.layout.removeItem(widget)
+            del widget
+
+        # read the settings file (again)
+        self.config = read_settings(self.settingsfilename)
+        # install the new user popup menu buttons
+        self.layout_user_menus(self.config)
 
 
 def read_settings(ini_file):
