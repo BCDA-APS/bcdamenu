@@ -7,6 +7,17 @@ Change History
 Production
 **********
 
+:2017.3.1:
+
+    * `#21 <https://github.com/prjemian/spec2nexus/issues/21>`_
+      allow command line help to be shown on MS Windows
+    * `#20 <https://github.com/prjemian/spec2nexus/issues/20>`_
+      show version on command line help
+    * `#18 <https://github.com/prjemian/spec2nexus/issues/18>`_
+      change internal handling of user menu specs from dictionary to list
+    * `#17 <https://github.com/prjemian/spec2nexus/issues/17>`_
+      preserve capitalization of menu items
+
 :2017.3.0:
 
    * initial release: 2017.03.21
