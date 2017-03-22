@@ -7,7 +7,7 @@ Change History
 Production
 **********
 
-:2017.3.1:
+:2017.3.2:
 
     * `#21 <https://github.com/prjemian/spec2nexus/issues/21>`_
       allow command line help to be shown on MS Windows
