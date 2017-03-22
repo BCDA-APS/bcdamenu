@@ -42,46 +42,47 @@ class PopupMenuButton(QPushButton):
 class MainButtonWindow(QWidget):
     '''the widget that holds the menu button'''
 
-    def __init__(self, parent=None, config=None):
+    def __init__(self, parent=None, settingsfilename=None):
         QWidget.__init__(self, parent)
-        self.config = config or {}
+        self.settingsfilename = settingsfilename
+        if settingsfilename is None:
+            raise ValueError('settings file name must be given')
         
         self.user_popups = OrderedDict()
-        layout = QHBoxLayout()
+        self.layout = QHBoxLayout()
 
-        self.layout_user_menus(self.config, layout)
-
-        self.admin_popup  = PopupMenuButton('Help...')
+        self.admin_popup  = PopupMenuButton('Help')
         self.admin_popup.addAction('About ...', self.about_box)
+        self.admin_popup.addSeparator()
+        self.admin_popup.addAction('Reload User Menus', self.reload_settings_file)
         # TODO: self.admin_popup.addAction('show log window') (issue #14)
         # TODO: edit settings file (issue #10)
-        # TODO: reload settings file (issue #11)
 
-        layout.addWidget(self.admin_popup)
+        self.reload_settings_file()
 
-        self.setLayout(layout)
+        self.layout.addWidget(self.admin_popup)
+
+        self.setLayout(self.layout)
         self.setWindowTitle(self.config.get('title', 'BCDA Menu'))
     
-    def layout_user_menus(self, config, layout):
+    def layout_user_menus(self, config):
         '''
         '''
-        for menu_name in config['menus']:
+        for menu_name in reversed(config['menus']):
             popup = PopupMenuButton(menu_name)
             self.user_popups[menu_name] = popup
 
-            title = config[menu_name].get('title', None)
-            if title is not None:
-                popup.setText(title)
-                del config[menu_name]['title']
-
-            # fallback to empty dictionary if not found
-            config_dict = config.get(menu_name, {})
-            for k, v in config_dict.items():
-                if k == 'separator' and v is None:
+            # fallback to empty list if not found
+            config_list = config.get(menu_name, [])
+            for entry in config_list:
+                k, v = entry
+                if k == 'title':
+                    popup.setText(v)
+                elif k == 'separator' and v is None:
                     popup.addSeparator()
                 else:
                     action = popup.addAction(k, partial(self.receiver, k, v))
-            layout.addWidget(popup)
+            self.layout.insertWidget(0, popup)
     
     def receiver(self, label, command):
         '''handle commands from menu button'''
@@ -101,13 +102,30 @@ class MainButtonWindow(QWidget):
         '''TODO: should display an About box'''
         # TODO: issue #13
         print(__doc__)
+    
+    def reload_settings_file(self):
+        '''(re)load the settings file and (re)create the popup button(s)'''
+        # remove the existing popup menu buttons
+        while self.layout.count() > 1:
+            widget = self.layout.takeAt(0)
+            self.layout.removeItem(widget)
+            del widget
+
+        # read the settings file (again)
+        self.config = read_settings(self.settingsfilename)
+        # install the new user popup menu buttons
+        self.layout_user_menus(self.config)
 
 
 def read_settings(ini_file):
     '''
     read the user menu settings from the .ini file
     '''
+    if not os.path.exists(ini_file):
+        raise ValueError('settings file not found: ' + ini_file)
+
     config = iniParser.ConfigParser(allow_no_value=True)
+    config.optionxform = str    # do not make labels lower case
     config.read(ini_file)
     
     settings = dict(title='BcdaMenu', menus='', version='unknown')
@@ -116,7 +134,7 @@ def read_settings(ini_file):
     settings['menus'] = settings['menus'].split()
 
     for menu_name in settings['menus']:
-        settings[menu_name] = OrderedDict()
+        settings[menu_name] = []
 
         # parse the settings file and coordinate numbered labels with commands
         labels = {}
@@ -124,7 +142,7 @@ def read_settings(ini_file):
         menu_items_dict = dict(config.items(menu_name))
         for k, v in menu_items_dict.items():
             if k == 'title':
-                settings[menu_name][k] = v
+                settings[menu_name].append([k, v])
             else:
                 parts = k.split()
                 if len(parts) < 2:
@@ -144,32 +162,34 @@ def read_settings(ini_file):
     
         # add the menu items in numerical order
         for k, label in sorted(labels.items()):
-            settings[menu_name][label] = commands[k]
+            settings[menu_name].append([label, commands[k]])
     
     return settings
 
 
-def gui(config = None):
+def gui(settingsfilename = None):
     '''display the main widget'''
     app = QApplication(sys.argv)
-    probe = MainButtonWindow(config=config)
-    probe.show()
+    the_gui = MainButtonWindow(settingsfilename=settingsfilename)
+    the_gui.show()
     sys.exit(app.exec_())
 
 
 def main():
     '''process any command line options before starting the GUI'''
+    import __init__
+    version = __init__.__version__
     doc = __doc__.strip().splitlines()[0]
-    #doc += '\n  v' + __init__.__version__
+    doc += '\n  v' + version
     parser = argparse.ArgumentParser(prog='BcdaMenu', description=doc)
     parser.add_argument('settingsfile', help="Settings file (.ini)")
+    parser.add_argument('-v', '--version', action='version', version=version)
     params = parser.parse_args()
 
     if not os.path.exists(params.settingsfile):
         raise IOError('file not found: ' + params.settingsfile)
 
-    settings = read_settings(params.settingsfile)
-    gui(config = settings)
+    gui(settingsfilename = params.settingsfile)
 
 
 if __name__ == '''__main__''':
