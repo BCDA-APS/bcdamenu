@@ -12,8 +12,8 @@ when starting the program.  For example, this Linux command::
 
     bcdamenu path/to/menus_settings.ini &
 
-Version 2017.3.0
-****************
+Version "2017.3.0" format of the Settings file
+**********************************************
 
 .. index:: settings file; version 2017.3.0
 
@@ -38,7 +38,11 @@ these sections are single words with no embedded white space.
 
 Within a section, one or more lines are given with the syntax of
 `key = value` (or `key: value`).  It is expected by the `.ini` format that
-any key is unique *within* its section.
+any key is unique *within* its section.  In **BcdaMenu**, the `key` has two parts.  
+First an integer is given that is used to sort the menu's items in order`.  
+The integer is not required to be strictly increasing from 1.  Gaps and 
+negative numbers are also allowed.  Keep the integers between -9999 .. 9999 to
+avoid any potential misunderstandings.  You *will not* have that many menu items.
 
 Refer to the :ref:`Example settings file <example.settings.file>`
 section for an example settings file.  As the examples show, both `key` and `value`
