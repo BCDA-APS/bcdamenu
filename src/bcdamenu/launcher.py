@@ -108,6 +108,7 @@ def read_settings(ini_file):
     read the user menu settings from the .ini file
     '''
     config = iniParser.ConfigParser(allow_no_value=True)
+    config.optionxform = str    # do not make labels lower case
     config.read(ini_file)
     
     settings = dict(title='BcdaMenu', menus='', version='unknown')
