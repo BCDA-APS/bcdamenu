@@ -177,10 +177,13 @@ def gui(settingsfilename = None):
 
 def main():
     '''process any command line options before starting the GUI'''
+    import __init__
+    version = __init__.__version__
     doc = __doc__.strip().splitlines()[0]
     #doc += '\n  v' + __init__.__version__
     parser = argparse.ArgumentParser(prog='BcdaMenu', description=doc)
     parser.add_argument('settingsfile', help="Settings file (.ini)")
+    parser.add_argument('-v', '--version', action='version', version=version)
     params = parser.parse_args()
 
     if not os.path.exists(params.settingsfile):
