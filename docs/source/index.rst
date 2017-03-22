@@ -4,8 +4,6 @@
 * **release**   |release|
 * **published** |today|
 
-NOTE:  This project is just starting and the documentation is not ready.
-
 Usage
 =====
 
@@ -16,7 +14,6 @@ Usage
 :bash starter file:
 
    #!/bin/bash
-   
    bcdamenu path/to/settings_file.ini &
 
 :usage:

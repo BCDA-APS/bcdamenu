@@ -14,6 +14,11 @@ Production
 Development
 ***********
 
+:2017.3.0rc4: 
+
+    * `#16 <https://github.com/prjemian/spec2nexus/issues/16>`_
+      described command line usage
+
 :2017.3.0rc3: 
 
     * `#9 <https://github.com/prjemian/spec2nexus/issues/9>`_
