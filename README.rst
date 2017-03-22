@@ -12,13 +12,12 @@ Provides
 Package Information
 ###################
 
-* **author**    : Pete R. Jemian
-* **email**     : jemian@anl.gov
-* **copyright** : 2017-, Pete R. Jemian
-* **license**   : ANL OPEN SOURCE LICENSE (see `LICENSE.txt <http://BcdaMenu.readthedocs.io/en/latest/license.html>`_ file)
-* **URL**       : documentation: http://bcdamenu.readthedocs.io
-* **git**       : source: https://github.com/BCDA-APS/bcdamenu
-* **PyPI**      : Distribution: https://pypi.python.org/pypi/bcdamenu/ 
+* **author**        : Pete R. Jemian
+* **email**         : jemian@anl.gov
+* **copyright**     : 2017-, Pete R. Jemian
+* **license**       : ANL OPEN SOURCE LICENSE (see `LICENSE.txt <http://BcdaMenu.readthedocs.io/en/latest/license.html>`_ file)
+* **documentation** : http://bcdamenu.readthedocs.io
+* **source**        : source: https://github.com/BCDA-APS/bcdamenu
 
 * **release badges**
    .. image:: https://img.shields.io/github/tag/BCDA-APS/bcdamenu.svg
