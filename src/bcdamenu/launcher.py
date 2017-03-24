@@ -109,7 +109,7 @@ class MainButtonWindow(QWidget):
         while self.layout.count() > 1:
             widget = self.layout.takeAt(0)
             self.layout.removeItem(widget)
-            del widget
+            widget.widget().deleteLater()
 
         # read the settings file (again)
         self.config = read_settings(self.settingsfilename)
