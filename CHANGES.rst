@@ -15,6 +15,8 @@ Production
       add option to lay out buttons vertical (horizontal is the default)
     * `#25 <https://github.com/prjemian/spec2nexus/issues/25>`_
       reload settings file now clears previous buttons
+    * `#24 <https://github.com/prjemian/spec2nexus/issues/24>`_
+      started an Examples section in the documentation
 
 :2017.3.2:
 

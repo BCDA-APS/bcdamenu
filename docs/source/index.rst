@@ -51,6 +51,7 @@ Contents
    :glob:
 
    settings
+   examples
    install
    source_code/*
    changes
