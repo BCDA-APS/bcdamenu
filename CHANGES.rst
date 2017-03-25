@@ -7,6 +7,13 @@ Change History
 Production
 **********
 
+:2017.3.3:
+
+    * `#27 <https://github.com/prjemian/spec2nexus/issues/27>`_
+      reload settings file now sets window title
+    * `#25 <https://github.com/prjemian/spec2nexus/issues/25>`_
+      reload settings file now clears previous buttons
+
 :2017.3.2:
 
     * `#21 <https://github.com/prjemian/spec2nexus/issues/21>`_

@@ -63,7 +63,6 @@ class MainButtonWindow(QWidget):
         self.layout.addWidget(self.admin_popup)
 
         self.setLayout(self.layout)
-        self.setWindowTitle(self.config.get('title', 'BCDA Menu'))
     
     def layout_user_menus(self, config):
         '''
@@ -115,6 +114,7 @@ class MainButtonWindow(QWidget):
         self.config = read_settings(self.settingsfilename)
         # install the new user popup menu buttons
         self.layout_user_menus(self.config)
+        self.setWindowTitle(self.config['title'])
 
 
 def read_settings(ini_file):
