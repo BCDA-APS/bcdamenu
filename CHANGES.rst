@@ -11,6 +11,8 @@ Production
 
     * `#27 <https://github.com/prjemian/spec2nexus/issues/27>`_
       reload settings file now sets window title
+    * `#26 <https://github.com/prjemian/spec2nexus/issues/26>`_
+      add option to lay out buttons vertical (horizontal is the default)
     * `#25 <https://github.com/prjemian/spec2nexus/issues/25>`_
       reload settings file now clears previous buttons
 
