@@ -5,7 +5,7 @@ Examples
 
 .. first cut at some examples - needs improvement and explanations
 
-this shows some possibilities
+this shows some possibilities::
 
     # bcdamenu.ini
     #
