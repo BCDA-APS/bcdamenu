@@ -181,3 +181,8 @@ Save all these files, commit, and push to the GitHub master.
 Since GH has been configured to notify RTD of any new commits,
 the build should be triggered in seconds to start automatically.
 Look for it at the project's RTD build pages.
+
+.. caution::  The popular badge icons that inform the current release version
+   or status on some related web site may cause the RTD build to fail
+   (such as https://github.com/BCDA-APS/bcdamenu/issues/6#issuecomment-289295297).
+   Remove them from documentation to be built by RTD.
