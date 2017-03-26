@@ -1,0 +1,7 @@
+name: bcdamenu
+dependencies:
+  - python=2.7.*
+  - pyqt>=4.*
+  - sip
+  - pip:
+    - versioneer
