@@ -1,7 +1,8 @@
 name: bcdamenu
 dependencies:
   - python=2.7.*
-  - pyqt>=4.*
+  - pyqt=4.*
   - sip
   - pip:
     - versioneer
+    - pyRestTable
