@@ -14,6 +14,10 @@ working code base.
 Use a custom Conda Environment
 ******************************
 
+This project will describe the requirements
+for a custom conda environment in which to
+RTD will build the documentation.
+
 Create the conda environment
 ============================
 
@@ -69,12 +73,13 @@ created using this command::
 Build docs in the custom conda environment
 ==========================================
 
-Use the *bcdamenu* custom conda environment::
+Use the *bcdamenu* custom conda environment,
+as created before::
 
     source activate bcdamenu
     cd ~/Documents/eclipse/bcdamenu
 
- Check that the documentation builds with no errors::
+Check that the documentation builds with no errors::
  
    cd docs
    make clean
@@ -140,8 +145,8 @@ pip.  In short, execute this command line in the root of the project::
 
 To avoid demanding any unecessary requirements, such as specific versions,
 it may be desireable to edit this file and specify just those packages
-requested by this project and wident the acceptable versions using 
-`>=` or `>` or even specific removing version number requirements.
+requested by this project and wident the acceptable versions using `*`,
+`>=`, `>` or even removing specific version number requirements.
 This step may take iteration to fine-tune the requirements for the environment.
 Refer to the steps to build the `environment.yml` file 
 `by hand <https://conda.io/docs/using/envs.html#create-environment-file-by-hand>`_.

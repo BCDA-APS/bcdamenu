@@ -1,9 +1,9 @@
 '''
-BCDA PyQt4 Widgets for EPICS
+GUI menu button to start common software
 '''
 
 __project__     = u'BcdaMenu'
-__description__ = u"Creates a GUI menu button to start common beam line software."
+__description__ = u"A GUI menu button to start common software."
 __copyright__   = u'2017-, UChicago Argonne, LLC'
 __authors__     = [u'Pete Jemian', ]
 __author__      = ', '.join(__authors__)
