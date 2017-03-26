@@ -7,7 +7,7 @@ Change History
 Production
 **********
 
-:2017.3.4:
+:2017.3.5:
 
     * `#6 <https://github.com/prjemian/spec2nexus/issues/6>`_
       source code now documented on ReadTheDocs
