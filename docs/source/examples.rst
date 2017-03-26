@@ -3,48 +3,29 @@
 Examples
 ========
 
-.. first cut at some examples - needs improvement and explanations
+Linux: variety of possibilities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-this shows some possibilities::
+an example from Linux with a number of possibilities
 
-    # bcdamenu.ini
-    #
-    # settings file for BcdaMenu GUI
+.. 
+    image:: examples/bcdamenu-gov-linux.png
+        :alt: screen shot
 
-    [BcdaMenu]
-    title = BcdaMenu: jemian@gov
-    version = 2017.3.0
-    menus = IOC BlueSky linux
+.. literalinclude:: examples/bcdamenu-gov-linux.ini
+    :tab-width: 4
+    :linenos:
+    :language: ini
 
-    [IOC]
-    ## synApps 5.8 IOC has start/stop/status/console features
-    title = iocgov on gov
-    1 caQtDM iocgov   = cd /home/oxygen/JEMIAN/sandbox/ioc/gov; ./start_caQtDM.sh
-    # 2 screen editor = # this is not supported yet
-    8 start IOC    = cd /home/oxygen/JEMIAN/sandbox/ioc/gov/iocBoot/iocLinux; ./gov.sh start
-    10 separator   =
-    14 console iocgov = cd /home/oxygen/JEMIAN/sandbox/ioc/gov/iocBoot/iocLinux; gnome-terminal -e "./gov.sh console"
-    15 status iocgov  = cd /home/oxygen/JEMIAN/sandbox/ioc/gov/iocBoot/iocLinux; ./gov.sh status
-    20 separator   =
-    23 stop iocgov    = cd /home/oxygen/JEMIAN/sandbox/ioc/gov/iocBoot/iocLinux; ./gov.sh stop
-    42 separator =
-    ## synApps 5.6 IOC : fewer features
-    #title = iocprj on gov
-    100 separator    =
-    101 caQtDM iocprj   = cd /home/oxygen/JEMIAN/sandbox/ioc/prj; ./start_caQtDM
-    103 start iocprj = /home/oxygen/JEMIAN/bin/start_ioc_prj.sh
-    114 console iocprj = cd /home/oxygen/JEMIAN/sandbox/ioc/prj/iocBoot/iocLinux; gnome-terminal  -e "screen -r"
+Windows: caQtDM & PyMca
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    [linux]
-    1 edit settings file = /bin/nedit-client ~/bin/bcdamenu.ini
-    44 xload = xload
+an example from Windows showing one absolute path and one default path
 
-    [BlueSky]
-    title = BlueSky stuff
-    14 BlueSky console = cd /home/oxygen/JEMIAN/Documents; gnome-terminal -e "/home/oxygen/JEMIAN/bin/use_bluesky.sh bluesky"
-    20 separator   =
-    22 start mViewer server (console) = cd /home/oxygen/JEMIAN/Apps/mViewer; gnome-terminal -e "./start_mviewer.sh 8086"
-    24 mongodb viewer (console) = /bin/google-chrome http://localhost:8086/index.html
-    90 separator   =
-    92 BlueSky documentation = /bin/google-chrome http://nsls-ii.github.io/bluesky
-    93 NSLS-II Software documentation = /bin/google-chrome http://nsls-ii.github.io
+.. image:: examples/bcdamenu-amb-windows.png
+    :alt: screen shot
+
+.. literalinclude:: examples/bcdamenu-amb-windows.ini
+    :tab-width: 4
+    :linenos:
+    :language: ini
