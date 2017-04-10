@@ -8,6 +8,7 @@ import datetime
 import os
 import sys
 import argparse
+import sip
 from PyQt4.QtGui import *
 from functools import partial
 import subprocess
@@ -48,9 +49,6 @@ class MainButtonWindow(QWidget):
         if settingsfilename is None:
             raise ValueError('settings file name must be given')
         
-        self.user_popups = OrderedDict()
-        self.layout = QHBoxLayout()
-
         self.admin_popup  = PopupMenuButton('Help')
         self.admin_popup.addAction('About ...', self.about_box)
         self.admin_popup.addSeparator()
@@ -59,30 +57,6 @@ class MainButtonWindow(QWidget):
         # TODO: edit settings file (issue #10)
 
         self.reload_settings_file()
-
-        self.layout.addWidget(self.admin_popup)
-
-        self.setLayout(self.layout)
-        self.setWindowTitle(self.config.get('title', 'BCDA Menu'))
-    
-    def layout_user_menus(self, config):
-        '''
-        '''
-        for menu_name in reversed(config['menus']):
-            popup = PopupMenuButton(menu_name)
-            self.user_popups[menu_name] = popup
-
-            # fallback to empty list if not found
-            config_list = config.get(menu_name, [])
-            for entry in config_list:
-                k, v = entry
-                if k == 'title':
-                    popup.setText(v)
-                elif k == 'separator' and v is None:
-                    popup.addSeparator()
-                else:
-                    action = popup.addAction(k, partial(self.receiver, k, v))
-            self.layout.insertWidget(0, popup)
     
     def receiver(self, label, command):
         '''handle commands from menu button'''
@@ -106,16 +80,49 @@ class MainButtonWindow(QWidget):
     def reload_settings_file(self):
         '''(re)load the settings file and (re)create the popup button(s)'''
         # remove the existing popup menu buttons
-        while self.layout.count() > 1:
-            widget = self.layout.takeAt(0)
-            self.layout.removeItem(widget)
-            del widget
+        layout = self.layout()
+        if layout is not None:
+            for key, widget in self.user_popups.items():
+                layout.removeWidget(widget)
+                widget.deleteLater()
+            layout.removeWidget(self.admin_popup)
+            sip.delete(layout)
 
         # read the settings file (again)
         self.config = read_settings(self.settingsfilename)
-        # install the new user popup menu buttons
-        self.layout_user_menus(self.config)
 
+        hv = 'horizontal'
+        if str(self.config.get('layout', hv)).lower() == hv:
+            layout = QHBoxLayout()
+        else:
+            layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        # install the new user popup menu buttons
+        self.user_popups = OrderedDict()
+        self.layout_user_menus(self.config)
+        layout.addWidget(self.admin_popup)
+        self.setWindowTitle(self.config['title'])
+
+    def layout_user_menus(self, config):
+        '''
+        '''
+        for menu_name in reversed(config['menus']):
+            popup = PopupMenuButton(menu_name)
+            self.user_popups[menu_name] = popup
+
+            # fallback to empty list if not found
+            config_list = config.get(menu_name, [])
+            for entry in config_list:
+                k, v = entry
+                if k == 'title':
+                    popup.setText(v)
+                elif k == 'separator' and v is None:
+                    popup.addSeparator()
+                else:
+                    action = popup.addAction(k, partial(self.receiver, k, v))
+            self.layout().insertWidget(0, popup)
+    
 
 def read_settings(ini_file):
     '''

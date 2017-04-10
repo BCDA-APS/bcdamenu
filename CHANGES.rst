@@ -7,6 +7,22 @@ Change History
 Production
 **********
 
+:2017.3.5:
+
+    * `#6 <https://github.com/prjemian/spec2nexus/issues/6>`_
+      source code now documented on ReadTheDocs
+
+:2017.3.3:
+
+    * `#27 <https://github.com/prjemian/spec2nexus/issues/27>`_
+      reload settings file now sets window title
+    * `#26 <https://github.com/prjemian/spec2nexus/issues/26>`_
+      add option to lay out buttons vertical (horizontal is the default)
+    * `#25 <https://github.com/prjemian/spec2nexus/issues/25>`_
+      reload settings file now clears previous buttons
+    * `#24 <https://github.com/prjemian/spec2nexus/issues/24>`_
+      started an Examples section in the documentation
+
 :2017.3.2:
 
     * `#21 <https://github.com/prjemian/spec2nexus/issues/21>`_

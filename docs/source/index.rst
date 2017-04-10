@@ -1,8 +1,27 @@
-.. include:: ../../README.rst
+########
+bcdamenu
+########
 
-* **version**   |version|
-* **release**   |release|
-* **published** |today|
+Creates a GUI menu button to start common beam line software
+
+Provides
+########
+
+* **bcdamenu**       : the button menu
+
+Package Information
+###################
+
+* **author**         Pete R. Jemian
+* **email**          jemian@anl.gov
+* **copyright**      2017-, Pete R. Jemian
+* **license**        ANL OPEN SOURCE LICENSE (see `LICENSE.txt <http://BcdaMenu.readthedocs.io/en/latest/license.html>`_ file)
+* **documentation**  http://bcdamenu.readthedocs.io
+* **source**         https://github.com/BCDA-APS/bcdamenu
+* **PyPI**           https://pypi.python.org/pypi/bcdamenu
+* **version**        |version|
+* **release**        |release|
+* **published**      |today|
 
 Usage
 =====
@@ -51,6 +70,7 @@ Contents
    :glob:
 
    settings
+   examples
    install
    source_code/*
    changes
