@@ -17,7 +17,7 @@ try:
     import configparser as iniParser
 except:
     import ConfigParser as iniParser
-
+import __init__
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
 
@@ -40,7 +40,7 @@ class PopupMenuButton(QPushButton):
         self.menu.addSeparator()
 
 
-class MainButtonWindow(QWidget):
+class MainButtonWindow(QMainWindow):
     '''the widget that holds the menu button'''
 
     def __init__(self, parent=None, settingsfilename=None):
@@ -75,7 +75,9 @@ class MainButtonWindow(QWidget):
     def about_box(self):
         '''TODO: should display an About box'''
         # TODO: issue #13
-        print(__doc__)
+        msg = __doc__
+        msg += '\n  version: ' + __init__.__version__
+        print(msg)
     
     def reload_settings_file(self):
         '''(re)load the settings file and (re)create the popup button(s)'''
