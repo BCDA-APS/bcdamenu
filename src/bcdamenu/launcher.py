@@ -8,7 +8,6 @@ import datetime
 import os
 import sys
 import argparse
-import sip
 from PyQt4.QtGui import *
 from functools import partial
 import subprocess
@@ -17,47 +16,52 @@ try:
     import configparser as iniParser
 except:
     import ConfigParser as iniParser
-import __init__
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
-
-
-class PopupMenuButton(QPushButton):
-    '''
-    a QPushButton that provides a popup menu
-    '''
-    
-    def __init__(self, button_name, *args, **kwargs):
-        QPushButton.__init__(self, *args, **kwargs)
-        self.setText(button_name)
-        self.menu = QMenu()
-        self.setMenu(self.menu)
-    
-    def addAction(self, text, action):
-        self.menu.addAction(text, action)
-    
-    def addSeparator(self):
-        self.menu.addSeparator()
 
 
 class MainButtonWindow(QMainWindow):
     '''the widget that holds the menu button'''
 
     def __init__(self, parent=None, settingsfilename=None):
-        QWidget.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
         self.settingsfilename = settingsfilename
         if settingsfilename is None:
             raise ValueError('settings file name must be given')
         
-        self.admin_popup  = PopupMenuButton('Help')
-        self.admin_popup.addAction('About ...', self.about_box)
-        self.admin_popup.addSeparator()
-        self.admin_popup.addAction('Reload User Menus', self.reload_settings_file)
-        # TODO: self.admin_popup.addAction('show log window') (issue #14)
+        # self.statusbar
+        self.statusbar = QStatusBar()
+        self.setStatusBar(self.statusbar)
+        
+        self.menubar = QMenuBar()
+        self.setMenuBar(self.menubar)
+        # self.menubar.setStyleSheet("background: #ddd")
+        self.menubar.setNativeMenuBar(False)    # keep menubar in the window
+        
+        self.history = ''
+        self.historyPane = QPlainTextEdit()
+        self.setCentralWidget(self.historyPane)
+        self.historyPane.setLineWrapMode(False)
+        # self.historyPane.setMinimumSize(0, 0)
+        self.historyPane.setReadOnly(True)
+        # self.historyPane.setStyleSheet("background: #eee")
+        self.hide_history_window()
+        self.resize(300,0)
+        
+        self.showStatus('starting %s ...' % sys.argv[0])
+        
+        self.admin_menu  = QMenu('Help')
+        self.menubar.addMenu(self.admin_menu)
+        self.admin_menu.addAction('About ...', self.about_box)
+        self.admin_menu.addSeparator()
+        self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
+        self.admin_menu.addAction('(Un)Hide history window', self.hide_history_window)
+        # TODO: self.admin_menu.addAction('show log window') (issue #14)
         # TODO: edit settings file (issue #10)
+        self.user_menus = OrderedDict()
 
         self.reload_settings_file()
-    
+
     def receiver(self, label, command):
         '''handle commands from menu button'''
         msg = 'BcdaMenu (' 
@@ -68,62 +72,67 @@ class MainButtonWindow(QMainWindow):
         else:
             command = os.path.normpath(command)
         msg += ':  ' + str(command)
-        print(msg)
+        self.showStatus(msg)
         if command is not None:
             subprocess.Popen(command, shell = True)
     
     def about_box(self):
         '''TODO: should display an About box'''
+        from bcdamenu import __version__, __url__
         # TODO: issue #13
-        msg = __doc__
-        msg += '\n  version: ' + __init__.__version__
-        print(msg)
+        msg = __doc__.strip()
+        msg += '\n  version: ' + __version__
+        msg += '\n  URL: ' + __url__
+        self.showStatus(msg)
+    
+    def showStatus(self, text):
+        """write to the status bar"""
+        self.statusbar.showMessage(text.splitlines()[0])
+        self.historyUpdate(text)
+
+    def historyUpdate(self, text):
+        """record history where user can see it"""
+        if len(self.history) != 0:
+            self.history += '\n'
+        self.history += text
+        if self.historyPane is not None:
+            self.historyPane.appendPlainText(text)
+
+    def hide_history_window(self):
+        """toggle the visibility of the history panel"""
+        self.historyPane.setHidden(not self.historyPane.isHidden())
     
     def reload_settings_file(self):
-        '''(re)load the settings file and (re)create the popup button(s)'''
-        # remove the existing popup menu buttons
-        layout = self.layout()
-        if layout is not None:
-            for key, widget in self.user_popups.items():
-                layout.removeWidget(widget)
-                widget.deleteLater()
-            layout.removeWidget(self.admin_popup)
-            sip.delete(layout)
+        '''(re)load the settings file and (re)create the menu(s)'''
+        self.showStatus('(re)load settings: ' + self.settingsfilename)
 
         # read the settings file (again)
         self.config = read_settings(self.settingsfilename)
-
-        hv = 'horizontal'
-        if str(self.config.get('layout', hv)).lower() == hv:
-            layout = QHBoxLayout()
-        else:
-            layout = QVBoxLayout()
-        self.setLayout(layout)
-
+  
         # install the new user popup menu buttons
-        self.user_popups = OrderedDict()
-        self.layout_user_menus(self.config)
-        layout.addWidget(self.admin_popup)
+        self.menubar.clear()
+        self.user_menus = OrderedDict()
+        self.build_user_menus(self.config)
+        self.menubar.addMenu(self.admin_menu)
         self.setWindowTitle(self.config['title'])
 
-    def layout_user_menus(self, config):
-        '''
-        '''
-        for menu_name in reversed(config['menus']):
-            popup = PopupMenuButton(menu_name)
-            self.user_popups[menu_name] = popup
+    def build_user_menus(self, config):
+        """build the user menus"""
+        for menu_name in config['menus']:
+            menu = QMenu(menu_name)
+            self.user_menus[menu_name] = menu
 
             # fallback to empty list if not found
             config_list = config.get(menu_name, [])
             for entry in config_list:
                 k, v = entry
                 if k == 'title':
-                    popup.setText(v)
+                    menu.setTitle(v)
                 elif k == 'separator' and v is None:
-                    popup.addSeparator()
+                    menu.addSeparator()
                 else:
-                    action = popup.addAction(k, partial(self.receiver, k, v))
-            self.layout().insertWidget(0, popup)
+                    action = menu.addAction(k, partial(self.receiver, k, v))
+            self.menubar.addMenu(menu)
     
 
 def read_settings(ini_file):

@@ -60,7 +60,6 @@ or "`=`" separator characters.  The comment characters allowed by the
      If this format ever changes, this key will be used to
      identify how to handle the different syntax of the 
      settings file of the new version.
-   :layout: Arrange the buttons `horizontal` (default) or `vertical`
 
    :menus: Names of the sections below with menu specifications.
       Its value may have more than one menu name, 
