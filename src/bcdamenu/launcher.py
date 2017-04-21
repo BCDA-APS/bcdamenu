@@ -9,6 +9,7 @@ import os
 import sys
 import argparse
 from PyQt4.QtGui import *
+from PyQt4.QtCore import QProcess, QTimer
 from functools import partial
 import subprocess
 from collections import OrderedDict
@@ -16,6 +17,9 @@ try:
     import configparser as iniParser
 except:
     import ConfigParser as iniParser
+from threading import Thread
+from functools import partial
+
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
 
@@ -29,7 +33,7 @@ class MainButtonWindow(QMainWindow):
         if settingsfilename is None:
             raise ValueError('settings file name must be given')
         
-        # self.statusbar
+        self.command_number = 0
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
         
@@ -74,8 +78,30 @@ class MainButtonWindow(QMainWindow):
         msg += ':  ' + str(command)
         self.showStatus(msg)
         if command is not None:
+            self.command_number += 1
+            proc_id = 'cmd' + str(self.command_number)
+
             subprocess.Popen(command, shell = True)
+
+            # proc = ProcessMonitorThread(command, self.historyUpdate)
+            # proc.start()
+
+            # process = QProcess()
+            # process.started.connect(partial(self.process_started, proc_id))
+            # process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id, process))
+            # process.finished.connect(partial(self.process_ended, proc_id))
+            # QTimer.singleShot(100, partial(process.start, command))
     
+#     def process_started(self, proc_id):
+#         self.historyUpdate(proc_id + ' started')
+# 
+#     def process_updated(self, proc_id, proc):
+#         msg = str(proc.readAllStandardOutput()).strip()
+#         self.historyUpdate(proc_id + ': ' + msg)
+# 
+#     def process_ended(self, proc_id):
+#         self.historyUpdate(proc_id + ' ended')
+
     def about_box(self):
         '''TODO: should display an About box'''
         from bcdamenu import __version__, __url__
@@ -133,7 +159,24 @@ class MainButtonWindow(QMainWindow):
                 else:
                     action = menu.addAction(k, partial(self.receiver, k, v))
             self.menubar.addMenu(menu)
-    
+
+
+# class ProcessMonitorThread(Thread):
+# 
+#     def __init__ (self, cmd, writeHistory):
+#         Thread.__init__(self)
+#         self.cmd = cmd
+#         self.writeHistory = writeHistory
+# 
+#     def run(self):
+#         # proc = os.popen(self.cmd, "r")
+#         proc = subprocess.Popen(self.cmd, shell=True, stdout=subprocess.PIPE)
+#         while True:
+#             line = proc.stdout.readline()
+#             if len(line) == 0:
+#                 break
+#             self.writeHistory(line)
+
 
 def read_settings(ini_file):
     '''
