@@ -82,6 +82,11 @@ class MainButtonWindow(QMainWindow):
             self.command_number += 1
             proc_id = 'cmd' + str(self.command_number)
 
+            # ?? Do this in a thread?  
+            # Need a signal/slot setup to handle history updates.
+            # with Capture_stdout() as printed_lines:
+            #     do_something_that_writes_stdout()
+
             # subprocess.Popen(command, shell = True)
 
             # proc = ProcessMonitorThread(command, self.historyUpdate)
