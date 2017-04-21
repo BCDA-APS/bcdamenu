@@ -10,9 +10,9 @@ import bcdamenu.launcher
 
 
 candidates = [
-    os.path.join(os.environ.get('HOME', 'not defined'), 'bin', 'bcdamenu.ini'),
-    os.path.join(os.environ.get('HOMEPATH', 'not defined'), '.bcdamenu.ini'),
-    os.path.join('src', 'bcdamenu', 'bcdamenu.ini')
+    os.path.join(os.environ.get('HOME', 'not defined'), 'bin', 'bcdamenu.ini'), # linux
+    os.path.join(os.environ.get('HOMEPATH', 'not defined'), '.bcdamenu.ini'),   # Windows
+    os.path.join('src', 'bcdamenu', 'bcdamenu.ini'),                            # source
 ]
 for path in candidates:
     if os.path.exists(path):
