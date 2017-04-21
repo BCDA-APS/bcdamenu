@@ -62,8 +62,6 @@ class MainButtonWindow(QMainWindow):
         self.admin_menu.addSeparator()
         self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
         self.admin_menu.addAction('(Un)Hide history window', self.hide_history_window)
-        # TODO: self.admin_menu.addAction('show log window') (issue #14)
-        # TODO: edit settings file (issue #10)
         self.user_menus = OrderedDict()
 
         self.reload_settings_file()
