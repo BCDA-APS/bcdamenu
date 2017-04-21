@@ -34,6 +34,8 @@ class MainButtonWindow(QMainWindow):
             raise ValueError('settings file name must be given')
         
         self.command_number = 0
+        self.process_dict = {}
+
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
         
@@ -81,26 +83,31 @@ class MainButtonWindow(QMainWindow):
             self.command_number += 1
             proc_id = 'cmd' + str(self.command_number)
 
-            subprocess.Popen(command, shell = True)
+            # subprocess.Popen(command, shell = True)
 
             # proc = ProcessMonitorThread(command, self.historyUpdate)
             # proc.start()
 
-            # process = QProcess()
-            # process.started.connect(partial(self.process_started, proc_id))
-            # process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id, process))
-            # process.finished.connect(partial(self.process_ended, proc_id))
-            # QTimer.singleShot(100, partial(process.start, command))
-    
-#     def process_started(self, proc_id):
-#         self.historyUpdate(proc_id + ' started')
-# 
-#     def process_updated(self, proc_id, proc):
-#         msg = str(proc.readAllStandardOutput()).strip()
-#         self.historyUpdate(proc_id + ': ' + msg)
-# 
-#     def process_ended(self, proc_id):
-#         self.historyUpdate(proc_id + ' ended')
+            process = QProcess()
+            self.process_dict[proc_id] = process
+            process.started.connect(partial(self.process_started, proc_id))
+            process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id, process))
+            process.finished.connect(partial(self.process_ended, proc_id))
+            QTimer.singleShot(100, partial(process.start, command))
+     
+    def process_started(self, proc_id):
+        self.historyUpdate(proc_id + ' started')
+ 
+    def process_updated(self, proc_id, proc):
+        msg = str(proc.readAllStandardOutput()).strip()
+        self.historyUpdate(proc_id + ': ' + msg)
+ 
+    def process_ended(self, proc_id):
+        if proc_id in self.process_dict:
+            del self.process_dict[proc_id]
+            self.historyUpdate(proc_id + ' ended')
+        else:
+            self.historyUpdate(proc_id + ' ended but not found in db')
 
     def about_box(self):
         '''TODO: should display an About box'''
