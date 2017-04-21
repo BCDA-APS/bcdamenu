@@ -19,6 +19,7 @@ except:
     import ConfigParser as iniParser
 from threading import Thread
 from functools import partial
+from six import StringIO
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
@@ -185,6 +186,24 @@ class MainButtonWindow(QMainWindow):
 #             if len(line) == 0:
 #                 break
 #             self.writeHistory(line)
+
+
+class Capture_stdout(list):
+    '''
+    capture all printed output (to stdout) into list
+    
+    # http://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
+    '''
+    def __enter__(self):
+        sys.stdout.flush()
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio    # free up some memory
+        sys.stdout = self._stdout
 
 
 def read_settings(ini_file):
