@@ -91,23 +91,27 @@ class MainButtonWindow(QMainWindow):
             process = QProcess()
             self.process_dict[proc_id] = process
             process.started.connect(partial(self.process_started, proc_id))
-            process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id, process))
+            process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id))
             process.finished.connect(partial(self.process_ended, proc_id))
             QTimer.singleShot(100, partial(process.start, command))
      
     def process_started(self, proc_id):
-        self.historyUpdate(proc_id + ' started')
+        self.showStatus(proc_id + ' started')
  
-    def process_updated(self, proc_id, proc):
+    def process_updated(self, proc_id):
+        if proc_id not in self.process_dict:
+            msg = proc_id + ' not found during update event!'
+            raise RuntimeError(msg)
+        proc = self.process_dict[proc_id]
         msg = str(proc.readAllStandardOutput()).strip()
         self.historyUpdate(proc_id + ': ' + msg)
  
     def process_ended(self, proc_id):
         if proc_id in self.process_dict:
             del self.process_dict[proc_id]
-            self.historyUpdate(proc_id + ' ended')
+            self.showStatus(proc_id + ' ended')
         else:
-            self.historyUpdate(proc_id + ' ended but not found in db')
+            self.showStatus(proc_id + ' ended but not found in db')
 
     def about_box(self):
         '''TODO: should display an About box'''
