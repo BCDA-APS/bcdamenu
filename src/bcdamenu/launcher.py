@@ -82,22 +82,21 @@ class MainButtonWindow(QMainWindow):
             self.command_number += 1
             proc_id = 'cmd' + str(self.command_number)
 
+            # subprocess.Popen(command, shell = True)
+
             # ?? Do this in a thread?  
             # Need a signal/slot setup to handle history updates.
-            # with Capture_stdout() as printed_lines:
-            #     do_something_that_writes_stdout()
-
-            # subprocess.Popen(command, shell = True)
+            with Capture_stdout() as printed_lines:
+                subprocess.Popen(command, shell = True)
 
             # proc = ProcessMonitorThread(command, self.historyUpdate)
             # proc.start()
 
-            process = QProcess()
-            self.process_dict[proc_id] = process
-            process.started.connect(partial(self.process_started, proc_id))
-            process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id))
-            process.finished.connect(partial(self.process_ended, proc_id))
-            QTimer.singleShot(100, partial(process.start, command))
+#             self.process_dict[proc_id] = process = QProcess()
+#             process.started.connect(partial(self.process_started, proc_id))
+#             process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id))
+#             process.finished.connect(partial(self.process_ended, proc_id))
+#             QTimer.singleShot(100, partial(process.start, command))
      
     def process_started(self, proc_id):
         self.showStatus(proc_id + ' started')
