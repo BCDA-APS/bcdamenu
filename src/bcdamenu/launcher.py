@@ -4,21 +4,20 @@
 BcdaMenu: Creates a GUI menu button to start common beam line software
 '''
 
-import datetime
-import os
-import sys
 import argparse
-from PyQt4.QtGui import *
-from PyQt4.QtCore import QProcess, QTimer
-from functools import partial
-import subprocess
 from collections import OrderedDict
+import datetime
 try:
     import configparser as iniParser
 except:
     import ConfigParser as iniParser
-from threading import Thread
 from functools import partial
+import os
+import subprocess
+import sys
+from threading import Thread
+from PyQt4.QtGui import *
+from PyQt4.QtCore import QProcess, QTimer
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
