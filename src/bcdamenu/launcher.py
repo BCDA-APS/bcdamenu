@@ -16,19 +16,18 @@ import os
 import subprocess
 import sys
 from threading import Thread
-from PyQt4.QtGui import *
-from PyQt4.QtCore import QProcess, QTimer
+from PyQt4 import QtGui, QtCore
 from six import StringIO
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
 
 
-class MainButtonWindow(QMainWindow):
+class MainButtonWindow(QtGui.QMainWindow):
     '''the widget that holds the menu button'''
 
     def __init__(self, parent=None, settingsfilename=None):
-        QMainWindow.__init__(self, parent)
+        QtGui.QMainWindow.__init__(self, parent)
         self.settingsfilename = settingsfilename
         if settingsfilename is None:
             raise ValueError('settings file name must be given')
@@ -36,16 +35,16 @@ class MainButtonWindow(QMainWindow):
         self.command_number = 0
         self.process_dict = {}
 
-        self.statusbar = QStatusBar()
+        self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
         
-        self.menubar = QMenuBar()
+        self.menubar = QtGui.QMenuBar()
         self.setMenuBar(self.menubar)
         # self.menubar.setStyleSheet("background: #ddd")
         self.menubar.setNativeMenuBar(False)    # keep menubar in the window
         
         self.history = ''
-        self.historyPane = QPlainTextEdit()
+        self.historyPane = QtGui.QPlainTextEdit()
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
         # self.historyPane.setMinimumSize(0, 0)
@@ -56,7 +55,7 @@ class MainButtonWindow(QMainWindow):
         
         self.showStatus('starting %s ...' % sys.argv[0])
         
-        self.admin_menu  = QMenu('Help')
+        self.admin_menu  = QtGui.QMenu('Help')
         self.menubar.addMenu(self.admin_menu)
         self.admin_menu.addAction('About ...', self.about_box)
         self.admin_menu.addSeparator()
@@ -91,11 +90,11 @@ class MainButtonWindow(QMainWindow):
             # proc = ProcessMonitorThread(command, self.historyUpdate)
             # proc.start()
 
-#             self.process_dict[proc_id] = process = QProcess()
+#             self.process_dict[proc_id] = process = QtGui.QProcess()
 #             process.started.connect(partial(self.process_started, proc_id))
 #             process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id))
 #             process.finished.connect(partial(self.process_ended, proc_id))
-#             QTimer.singleShot(100, partial(process.start, command))
+#             QtGui.QTimer.singleShot(100, partial(process.start, command))
      
     def process_started(self, proc_id):
         self.showStatus(proc_id + ' started')
@@ -158,7 +157,7 @@ class MainButtonWindow(QMainWindow):
     def build_user_menus(self, config):
         """build the user menus"""
         for menu_name in config['menus']:
-            menu = QMenu(menu_name)
+            menu = QtGui.QMenu(menu_name)
             self.user_menus[menu_name] = menu
 
             # fallback to empty list if not found
@@ -261,7 +260,7 @@ def read_settings(ini_file):
 
 def gui(settingsfilename = None):
     '''display the main widget'''
-    app = QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
     the_gui = MainButtonWindow(settingsfilename=settingsfilename)
     the_gui.show()
     sys.exit(app.exec_())
