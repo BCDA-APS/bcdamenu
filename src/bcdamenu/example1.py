@@ -14,14 +14,14 @@ from PyQt4 import QtGui, QtCore
 
 CAGET = "/usr/local/epics/base/bin/linux-x86_64/caget"
 CAMONITOR = "/usr/local/epics/base/bin/linux-x86_64/camonitor"
-COMMAND_TIME          = CAGET + " xxx:iso8601"
-COMMAND_TEMPERATURE   = CAGET + " garpi:mega:temperature"
+COMMAND_TIME          = CAMONITOR + " xxx:iso8601"
+COMMAND_TEMPERATURE   = CAMONITOR + " garpi:mega:temperature"
 COMMAND_HUMIDITY      = CAGET + " garpi:mega:humidity"
 
 
 class MyExample(QtCore.QObject):
 
-    signal_response = QtCore.pyqtSignal(str)
+    process_response = QtCore.pyqtSignal(str)
     
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
@@ -38,32 +38,36 @@ class MyExample(QtCore.QObject):
         self.gui.b_time.clicked.connect(partial(self.os_command, COMMAND_TIME))
         self.gui.b_temperature.clicked.connect(partial(self.os_command, COMMAND_TEMPERATURE))
         self.gui.b_humidity.clicked.connect(partial(self.os_command, COMMAND_HUMIDITY))
+        self.gui.closing.connect(self.closeEvent)
 
         # responses
-        self.signal_response.connect(self.gui.updateStatus)
+        self.process_response.connect(self.gui.updateStatus)
     
     def os_command(self, command):
-        # self.signal_response.emit(str(command))
+        # self.process_response.emit(str(command))
         self.worker_qprocess(command)
     
     def worker_qprocess(self, command):
-        '''handle commands using subprocess'''
+        '''handle commands using QtCore.QProcess'''
         process = QtCore.QProcess(self)
         self.command_number += 1
         process_name = "id_" + str(self.command_number)
         self.process_dict[process_name] = process
         
         process.setReadChannel(QtCore.QProcess.StandardOutput)
-        # process.started.connect(partial(self.onStart, process_name))
+        process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+
+        process.started.connect(partial(self.onStart, process_name))
         process.finished.connect(partial(self.onFinish, process_name))
         # process.stateChanged.connect(partial(self.onStateChanged, process_name))
         process.readyRead.connect(partial(self.onUpdate, process_name))
 
         status = process.start(command)
         # print("status: " + str(status))
+        # print("pid: " + str(process.pid()))
     
     def onStart(self, process_name):
-        print("start: " + str(process_name))
+        self.process_response.emit("start: " + str(process_name))
     
     def onFinish(self, process_name):
         if process_name in self.process_dict:
@@ -77,12 +81,22 @@ class MyExample(QtCore.QObject):
     def onUpdate(self, process_name):
         if process_name in self.process_dict:
             process = self.process_dict[process_name]
-            msg = str(process.readAllStandardOutput()).strip()
-            self.signal_response.emit(msg)
-            print(str(datetime.datetime.now()) + ' ' + msg)
+            buffer = process.readAllStandardOutput()
+            for line in str(buffer).splitlines():
+                self.process_response.emit(line)
+                print(str(datetime.datetime.now()) + ' ' + line)
+    
+    @QtCore.pyqtSlot(QtGui.QCloseEvent)
+    def closeEvent(self, event):
+        # delete any subprocesses as application exits
+        for k, process in self.process_dict.items():
+            process.close()
+        self.process_dict = {}
 
 
 class Window(QtGui.QWidget):
+    
+    closing = QtCore.pyqtSignal(QtGui.QCloseEvent)
 
     def __init__(self):
         QtGui.QWidget.__init__(self)
@@ -102,6 +116,10 @@ class Window(QtGui.QWidget):
     @QtCore.pyqtSlot(str)
     def updateStatus(self, status):
         self.l_status.setText(status)
+    
+    @QtCore.pyqtSlot(QtGui.QCloseEvent)
+    def closeEvent(self, event):
+        self.closing.emit(event)
 
 
 def command(processor, cmd):
@@ -110,16 +128,6 @@ def command(processor, cmd):
 
 
 if __name__ == "__main__":
-    # my_example = MyExample()
-    # for i in range(30):
-    #     print("iteration " + str(i))
-    #     if i == 0:
-    #         command(my_example, "camonitor xxx:iso8601")
-    #     elif i == 4:
-    #         command(my_example, "camonitor garpi:mega:temperature")
-    #     command(my_example, 'caget garpi:mega:humidity')
-    #     sleep(2)
-
     app = QtGui.QApplication(sys.argv)
     example = MyExample(app)
     sys.exit(app.exec_())
