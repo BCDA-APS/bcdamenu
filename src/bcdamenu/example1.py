@@ -84,7 +84,7 @@ class MyExample(QtCore.QObject):
             buffer = process.readAllStandardOutput()
             for line in str(buffer).splitlines():
                 self.process_response.emit(line)
-                print(str(datetime.datetime.now()) + ' ' + line)
+                print(' '.join([str(datetime.datetime.now()), process_name, line]))
     
     @QtCore.pyqtSlot(QtGui.QCloseEvent)
     def closeEvent(self, event):
