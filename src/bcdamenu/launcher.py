@@ -18,6 +18,7 @@ import sys
 from threading import Thread
 from PyQt4.QtGui import *
 from PyQt4.QtCore import QProcess, QTimer
+from six import StringIO
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
@@ -61,8 +62,6 @@ class MainButtonWindow(QMainWindow):
         self.admin_menu.addSeparator()
         self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
         self.admin_menu.addAction('(Un)Hide history window', self.hide_history_window)
-        # TODO: self.admin_menu.addAction('show log window') (issue #14)
-        # TODO: edit settings file (issue #10)
         self.user_menus = OrderedDict()
 
         self.reload_settings_file()
@@ -84,29 +83,37 @@ class MainButtonWindow(QMainWindow):
 
             # subprocess.Popen(command, shell = True)
 
+            # ?? Do this in a thread?  
+            # Need a signal/slot setup to handle history updates.
+            with Capture_stdout() as printed_lines:
+                subprocess.Popen(command, shell = True)
+
             # proc = ProcessMonitorThread(command, self.historyUpdate)
             # proc.start()
 
-            process = QProcess()
-            self.process_dict[proc_id] = process
-            process.started.connect(partial(self.process_started, proc_id))
-            process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id, process))
-            process.finished.connect(partial(self.process_ended, proc_id))
-            QTimer.singleShot(100, partial(process.start, command))
+#             self.process_dict[proc_id] = process = QProcess()
+#             process.started.connect(partial(self.process_started, proc_id))
+#             process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id))
+#             process.finished.connect(partial(self.process_ended, proc_id))
+#             QTimer.singleShot(100, partial(process.start, command))
      
     def process_started(self, proc_id):
-        self.historyUpdate(proc_id + ' started')
+        self.showStatus(proc_id + ' started')
  
-    def process_updated(self, proc_id, proc):
+    def process_updated(self, proc_id):
+        if proc_id not in self.process_dict:
+            msg = proc_id + ' not found during update event!'
+            raise RuntimeError(msg)
+        proc = self.process_dict[proc_id]
         msg = str(proc.readAllStandardOutput()).strip()
         self.historyUpdate(proc_id + ': ' + msg)
  
     def process_ended(self, proc_id):
         if proc_id in self.process_dict:
             del self.process_dict[proc_id]
-            self.historyUpdate(proc_id + ' ended')
+            self.showStatus(proc_id + ' ended')
         else:
-            self.historyUpdate(proc_id + ' ended but not found in db')
+            self.showStatus(proc_id + ' ended but not found in db')
 
     def about_box(self):
         '''TODO: should display an About box'''
@@ -182,6 +189,24 @@ class MainButtonWindow(QMainWindow):
 #             if len(line) == 0:
 #                 break
 #             self.writeHistory(line)
+
+
+class Capture_stdout(list):
+    '''
+    capture all printed output (to stdout) into list
+    
+    # http://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
+    '''
+    def __enter__(self):
+        sys.stdout.flush()
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio    # free up some memory
+        sys.stdout = self._stdout
 
 
 def read_settings(ini_file):
