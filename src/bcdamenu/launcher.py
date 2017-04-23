@@ -68,6 +68,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.admin_menu.addSeparator()
         self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
         self.admin_menu.addSeparator()
+        self.admin_menu.addAction('(Un)hide history panel', self.hide_history_window)
         self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
         self.user_menus = OrderedDict()
 
