@@ -21,7 +21,6 @@ from six import StringIO
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
-DEBUG = False
 
 
 class MainButtonWindow(QtGui.QMainWindow):
@@ -38,6 +37,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.command_number = 0
         self.process_dict = {}
         self.environment = QtCore.QProcessEnvironment().systemEnvironment()
+        self.debug = False
 
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
@@ -63,7 +63,8 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.admin_menu.addAction('About ...', self.about_box)
         self.admin_menu.addSeparator()
         self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
-        self.admin_menu.addAction('(Un)Hide history window', self.hide_history_window)
+        self.admin_menu.addSeparator()
+        self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
         self.user_menus = OrderedDict()
 
         self.reload_settings_file()
@@ -97,21 +98,25 @@ class MainButtonWindow(QtGui.QMainWindow):
             process.finished.connect(partial(self.onFinish, process_name))
     
             status = process.start(command)
-            if DEBUG:
+            if self.debug:
                 self.process_responded.emit("state: " + str(process.state()))
                 self.process_responded.emit("pid: " + str(process.pid()))
     
+    @QtCore.pyqtSlot()
+    def toggleDebug(self):
+        self.debug = not self.debug
+
     def _writeBufferToHistory(self, proc_id, caller_name = None):
         process = self.process_dict[proc_id]
-        if DEBUG:
+        if self.debug:
             self.process_responded.emit("state: " + str(process.state()))
         buffer = process.readAll()
         for line in str(buffer).splitlines():
             msg = line
-            if DEBUG:
+            if self.debug:
                 msg = caller_name + ": " + line
             self.process_responded.emit(msg)
-            if DEBUG:
+            if self.debug:
                 print(' '.join([proc_id, caller_name, str(datetime.datetime.now()), line]))
 
     @QtCore.pyqtSlot(str)
@@ -127,7 +132,7 @@ class MainButtonWindow(QtGui.QMainWindow):
     
     @QtCore.pyqtSlot(str)
     def onStart(self, proc_id):
-        if DEBUG:
+        if self.debug:
             self.process_responded.emit("start: " + proc_id)
  
     @QtCore.pyqtSlot(str)
@@ -135,7 +140,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         if proc_id not in self.process_dict:
             msg = proc_id + ' not found during update event!'
             raise RuntimeError(msg)
-        if DEBUG:
+        if self.debug:
             self._writeBufferToHistory(proc_id, "onUpdate")
         else:
             self._writeBufferToHistory(proc_id)
@@ -145,14 +150,14 @@ class MainButtonWindow(QtGui.QMainWindow):
         if proc_id in self.process_dict:
             self._writeBufferToHistory(proc_id, "onFinish")
 
-            if DEBUG:
+            if self.debug:
                 self.process_responded.emit("last error string: " + self.process_dict[proc_id].errorString())
                 self.process_responded.emit("last error code: " + str(self.process_dict[proc_id].error()))
                 self.process_responded.emit("exitCode: " + str(self.process_dict[proc_id].exitCode()))
                 self.process_responded.emit("exitStatus: " + str(self.process_dict[proc_id].exitStatus()))
 
             del self.process_dict[proc_id]
-            if DEBUG:
+            if self.debug:
                 self.showStatus(proc_id + ' ended')
         else:
             self.showStatus(proc_id + ' ended but not found in db')
@@ -160,7 +165,7 @@ class MainButtonWindow(QtGui.QMainWindow):
     @QtCore.pyqtSlot(str, int)
     def onStateChanged(self, process_name, state_number):
         states = ["NotRunning", "Starting", "Running"]
-        if DEBUG:
+        if self.debug:
             print("change: ", process_name, states[state_number])
 
     def about_box(self):
