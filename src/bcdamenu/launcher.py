@@ -36,8 +36,10 @@ class MainButtonWindow(QtGui.QMainWindow):
         
         self.command_number = 0
         self.process_dict = {}
-        self.environment = QtCore.QProcessEnvironment().systemEnvironment()
         self.debug = False
+        self.environment = QtCore.QProcessEnvironment()
+        for k, v in os.environ.items():
+            self.environment.insert(k, v)
 
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
@@ -99,6 +101,8 @@ class MainButtonWindow(QtGui.QMainWindow):
     
             status = process.start(command)
             if self.debug:
+                self.process_responded.emit("label: |%s|" % label)
+                self.process_responded.emit("command: |%s|" % command)
                 self.process_responded.emit("state: " + str(process.state()))
                 self.process_responded.emit("pid: " + str(process.pid()))
     
