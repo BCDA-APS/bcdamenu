@@ -21,6 +21,7 @@ from six import StringIO
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
+DEBUG = False
 
 
 class MainButtonWindow(QtGui.QMainWindow):
@@ -36,7 +37,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         
         self.command_number = 0
         self.process_dict = {}
-        self.debug = False
+        self.debug = DEBUG
         self.environment = QtCore.QProcessEnvironment()
         for k, v in os.environ.items():
             self.environment.insert(k, v)
@@ -53,8 +54,9 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
         self.historyPane.setReadOnly(True)
-        #self.hide_history_window()
-        #self.resize(300,0)
+        if not self.debug:
+            self.hide_history_window()
+            self.resize(400,0)
 
         self.process_responded.connect(self.historyUpdate)
         
