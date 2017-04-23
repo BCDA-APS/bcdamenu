@@ -8,5 +8,15 @@ import sys
 sys.path.insert(0, os.path.join('src', ))
 import bcdamenu.launcher
 
-sys.argv.append(os.path.join('src', 'bcdamenu', 'bcdamenu.ini'))
+
+candidates = [
+    os.path.join(os.environ.get('HOME', 'not defined'), 'bin', 'bcdamenu.ini'), # linux
+    os.path.join(os.environ.get('HOMEPATH', 'not defined'), '.bcdamenu.ini'),   # Windows
+    os.path.join('src', 'bcdamenu', 'bcdamenu.ini'),                            # source
+]
+for path in candidates:
+    if os.path.exists(path):
+        sys.argv.append(path)
+        break
+    
 bcdamenu.launcher.main()

@@ -7,6 +7,11 @@ Change History
 Production
 **********
 
+:2017.4.0:
+
+    * `#30 <https://github.com/prjemian/spec2nexus/issues/30>`_
+      changed buttons into menubar, added history panel
+
 :2017.3.5:
 
     * `#6 <https://github.com/prjemian/spec2nexus/issues/6>`_
