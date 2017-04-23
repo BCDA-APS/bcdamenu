@@ -13,9 +13,10 @@ from time import sleep
 from PyQt4 import QtGui, QtCore
 
 CAGET = "/usr/local/epics/base/bin/linux-x86_64/caget"
+CAINFO = "/usr/local/epics/base/bin/linux-x86_64/cainfo"
 CAMONITOR = "/usr/local/epics/base/bin/linux-x86_64/camonitor"
 COMMAND_TIME          = CAMONITOR + " xxx:iso8601"
-COMMAND_TEMPERATURE   = CAMONITOR + " garpi:mega:temperature"
+COMMAND_TEMPERATURE   = CAINFO + " garpi:mega:temperature"
 COMMAND_HUMIDITY      = CAGET + " garpi:mega:humidity"
 
 
@@ -28,6 +29,7 @@ class MyExample(QtCore.QObject):
 
         self.command_number = 0
         self.process_dict = {}
+        self.environment = QtCore.QProcessEnvironment().systemEnvironment()
 
         self.gui = Window()
         self._connectSignals()
@@ -56,6 +58,7 @@ class MyExample(QtCore.QObject):
         
         process.setReadChannel(QtCore.QProcess.StandardOutput)
         process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+        process.setProcessEnvironment(self.environment)
 
         process.started.connect(partial(self.onStart, process_name))
         process.finished.connect(partial(self.onFinish, process_name))

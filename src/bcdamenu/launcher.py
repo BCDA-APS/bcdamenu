@@ -26,6 +26,8 @@ MAIN_SECTION_LABEL = 'BcdaMenu'
 class MainButtonWindow(QtGui.QMainWindow):
     '''the widget that holds the menu button'''
 
+    process_responded = QtCore.pyqtSignal(str)
+
     def __init__(self, parent=None, settingsfilename=None):
         QtGui.QMainWindow.__init__(self, parent)
         self.settingsfilename = settingsfilename
@@ -34,24 +36,24 @@ class MainButtonWindow(QtGui.QMainWindow):
         
         self.command_number = 0
         self.process_dict = {}
+        self.environment = QtCore.QProcessEnvironment().systemEnvironment()
 
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
         
         self.menubar = QtGui.QMenuBar()
         self.setMenuBar(self.menubar)
-        # self.menubar.setStyleSheet("background: #ddd")
         self.menubar.setNativeMenuBar(False)    # keep menubar in the window
         
         self.history = ''
         self.historyPane = QtGui.QPlainTextEdit()
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
-        # self.historyPane.setMinimumSize(0, 0)
         self.historyPane.setReadOnly(True)
-        # self.historyPane.setStyleSheet("background: #eee")
-        self.hide_history_window()
-        self.resize(300,0)
+        #self.hide_history_window()
+        #self.resize(300,0)
+
+        self.process_responded.connect(self.historyUpdate)
         
         self.showStatus('starting %s ...' % sys.argv[0])
         
@@ -78,41 +80,74 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.showStatus(msg)
         if command is not None:
             self.command_number += 1
-            proc_id = 'cmd' + str(self.command_number)
+            process_name = "id_" + str(self.command_number)
 
-            # subprocess.Popen(command, shell = True)
+            process = QtCore.QProcess(self)
+            self.process_dict[process_name] = process
+            
+            process.setReadChannel(QtCore.QProcess.StandardOutput)
+            process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+            process.setProcessEnvironment(self.environment)
+    
+            process.error.connect(partial(self.onError, process_name))
+            process.started.connect(partial(self.onStart, process_name))
+            # process.stateChanged.connect(partial(self.onStateChanged, process_name))
+            process.readyRead.connect(partial(self.onUpdate, process_name))
+            process.finished.connect(partial(self.onFinish, process_name))
+    
+            status = process.start(command)
+            self.process_responded.emit("state: " + str(process.state()))
+            self.process_responded.emit("pid: " + str(process.pid()))
+    
+    def _writeBufferToHistory(self, proc_id, caller_name):
+        process = self.process_dict[proc_id]
+        self.process_responded.emit("state: " + str(process.state()))
+        buffer = process.readAll()
+        for line in str(buffer).splitlines():
+            self.process_responded.emit(caller_name + ": " + line)
+            print(' '.join([proc_id, caller_name, str(datetime.datetime.now()), line]))
 
-            # ?? Do this in a thread?  
-            # Need a signal/slot setup to handle history updates.
-            with Capture_stdout() as printed_lines:
-                subprocess.Popen(command, shell = True)
+    @QtCore.pyqtSlot(str)
+    def onError(self, proc_id):
+        self.process_responded.emit("error: " + proc_id)
+        if proc_id in self.process_dict:
+            self._writeBufferToHistory(proc_id, "onError")
+            self.process_responded.emit("error string: " + self.process_dict[proc_id].errorString())
 
-            # proc = ProcessMonitorThread(command, self.historyUpdate)
-            # proc.start()
-
-#             self.process_dict[proc_id] = process = QtGui.QProcess()
-#             process.started.connect(partial(self.process_started, proc_id))
-#             process.readyReadStandardOutput.connect(partial(self.process_updated, proc_id))
-#             process.finished.connect(partial(self.process_ended, proc_id))
-#             QtGui.QTimer.singleShot(100, partial(process.start, command))
-     
-    def process_started(self, proc_id):
-        self.showStatus(proc_id + ' started')
+            self.process_responded.emit("last error code: " + str(self.process_dict[proc_id].error()))
+            self.process_responded.emit("exitCode: " + str(self.process_dict[proc_id].exitCode()))
+            self.process_responded.emit("exitStatus: " + str(self.process_dict[proc_id].exitStatus()))
+    
+    @QtCore.pyqtSlot(str)
+    def onStart(self, proc_id):
+        self.process_responded.emit("start: " + proc_id)
  
-    def process_updated(self, proc_id):
+    @QtCore.pyqtSlot(str)
+    def onUpdate(self, proc_id):
         if proc_id not in self.process_dict:
             msg = proc_id + ' not found during update event!'
             raise RuntimeError(msg)
-        proc = self.process_dict[proc_id]
-        msg = str(proc.readAllStandardOutput()).strip()
-        self.historyUpdate(proc_id + ': ' + msg)
+        self._writeBufferToHistory(proc_id, "onUpdate")
  
-    def process_ended(self, proc_id):
+    @QtCore.pyqtSlot(str)
+    def onFinish(self, proc_id):
         if proc_id in self.process_dict:
+            self._writeBufferToHistory(proc_id, "onFinish")
+
+            self.process_responded.emit("last error string: " + self.process_dict[proc_id].errorString())
+            self.process_responded.emit("last error code: " + str(self.process_dict[proc_id].error()))
+            self.process_responded.emit("exitCode: " + str(self.process_dict[proc_id].exitCode()))
+            self.process_responded.emit("exitStatus: " + str(self.process_dict[proc_id].exitStatus()))
+
             del self.process_dict[proc_id]
             self.showStatus(proc_id + ' ended')
         else:
             self.showStatus(proc_id + ' ended but not found in db')
+
+    @QtCore.pyqtSlot(str, int)
+    def onStateChanged(self, process_name, state_number):
+        states = ["NotRunning", "Starting", "Running"]
+        print("change: ", process_name, states[state_number])
 
     def about_box(self):
         '''TODO: should display an About box'''
@@ -172,40 +207,12 @@ class MainButtonWindow(QtGui.QMainWindow):
                     action = menu.addAction(k, partial(self.receiver, k, v))
             self.menubar.addMenu(menu)
 
-
-# class ProcessMonitorThread(Thread):
-# 
-#     def __init__ (self, cmd, writeHistory):
-#         Thread.__init__(self)
-#         self.cmd = cmd
-#         self.writeHistory = writeHistory
-# 
-#     def run(self):
-#         # proc = os.popen(self.cmd, "r")
-#         proc = subprocess.Popen(self.cmd, shell=True, stdout=subprocess.PIPE)
-#         while True:
-#             line = proc.stdout.readline()
-#             if len(line) == 0:
-#                 break
-#             self.writeHistory(line)
-
-
-class Capture_stdout(list):
-    '''
-    capture all printed output (to stdout) into list
-    
-    # http://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
-    '''
-    def __enter__(self):
-        sys.stdout.flush()
-        self._stdout = sys.stdout
-        sys.stdout = self._stringio = StringIO()
-        return self
-
-    def __exit__(self, *args):
-        self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio    # free up some memory
-        sys.stdout = self._stdout
+    @QtCore.pyqtSlot(QtGui.QCloseEvent)
+    def closeEvent(self, event):
+        # delete any subprocesses as application exits
+        for k, process in self.process_dict.items():
+            process.close()
+        self.process_dict = {}
 
 
 def read_settings(ini_file):
