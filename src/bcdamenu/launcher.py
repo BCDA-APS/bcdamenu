@@ -24,6 +24,7 @@ else:
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
 DEBUG = False
+DEBUG = True
 DEBUG_COLOR_OFF = "white"
 DEBUG_COLOR_ON = "#fec"
 OUTPUT_POLL_INTERVAL_MS = 50    # any way to avoid polling?
@@ -100,9 +101,13 @@ class MainButtonWindow(QtGui.QMainWindow):
             
             # ref: https://docs.python.org/3.3/library/subprocess.html
             args = shlex.split(str(command))
+            args = str(command)
+            if self.debug:
+                msg = " ".join([process_name, str(datetime.datetime.now()), "args", str(args)])
+                self.historyUpdate(msg)
             process = subprocess.Popen(
                 args,
-                shell = False,
+                shell = True,
                 stderr = subprocess.STDOUT,
                 stdout = subprocess.PIPE,
                 universal_newlines = True,
