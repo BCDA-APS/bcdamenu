@@ -44,7 +44,6 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.command_number = 0
         self.process_dict = {}
         self.timer_dict = {}
-        self.debug = DEBUG
         self.command_echo = True
 
         self.statusbar = QtGui.QStatusBar()
@@ -59,6 +58,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
         self.historyPane.setReadOnly(True)
+        self.toggleDebug(DEBUG)
         if self.debug:
             self.resize(500,300)
             self.historyPane.setStyleSheet("background: " + DEBUG_COLOR_ON)
@@ -146,8 +146,8 @@ class MainButtonWindow(QtGui.QMainWindow):
                     del self.timer_dict[proc_name]
     
     @QtCore.pyqtSlot()
-    def toggleDebug(self):
-        self.debug = not self.debug
+    def toggleDebug(self, debug_state = None):
+        self.debug = debug_state or not self.debug
         color = {True: DEBUG_COLOR_ON, False: DEBUG_COLOR_OFF}[self.debug]
         self.historyPane.setStyleSheet("background: " + color)
 
