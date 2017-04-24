@@ -84,10 +84,13 @@ class MainButtonWindow(QtGui.QMainWindow):
 
         self.reload_settings_file()
 
+    def timestamp(self):
+        return str(datetime.datetime.now())
+
     def receiver(self, label, command):
         '''handle commands from menu button'''
         msg = 'BcdaMenu (' 
-        msg += str(datetime.datetime.now())
+        msg += self.timestamp()
         msg += '), ' + label
         if command is None:
             msg += ': '
@@ -103,13 +106,13 @@ class MainButtonWindow(QtGui.QMainWindow):
             args = shlex.split(str(command))
             args = str(command)
             if self.debug:
-                msg = " ".join([process_name, str(datetime.datetime.now()), "args", str(args)])
+                msg = " ".join([process_name, self.timestamp(), "args", str(args)])
                 self.historyUpdate(msg)
             process = subprocess.Popen(
                 args,
                 shell = True,
                 stderr = subprocess.STDOUT,
-                stdout = subprocess.PIPE,
+                # stdout = subprocess.PIPE,
                 universal_newlines = True,
             )
 
@@ -120,7 +123,7 @@ class MainButtonWindow(QtGui.QMainWindow):
             timer.timeout.connect(partial(self.process_reporter, process_name))
             timer.start(OUTPUT_POLL_INTERVAL_MS)
             if self.debug:
-                msg = " ".join([process_name, str(datetime.datetime.now()), "started"])
+                msg = " ".join([process_name, self.timestamp(), "started"])
                 self.process_responded.emit(msg)
 
 
@@ -129,21 +132,19 @@ class MainButtonWindow(QtGui.QMainWindow):
         """write any process output to history"""
         if proc_name in self.process_dict:
             process = self.process_dict[proc_name]
-            buffer = process.stdout.read()
-            if len(buffer) > 0:
-                for line in buffer.splitlines():
-                    if self.debug:
-                        line = " ".join([proc_name, str(datetime.datetime.now()), line])
-                    self.process_responded.emit(line)
-            result = process.poll()
-            if result is not None:
-                if self.debug:
-                    msg = " ".join([proc_name, str(datetime.datetime.now()), "ended"])
-                    self.process_responded.emit(msg)
+            if process is None:
                 del self.process_dict[proc_name]
                 if proc_name in self.timer_dict:
                     self.timer_dict[proc_name].stop()
                     del self.timer_dict[proc_name]
+                return
+            if process.stdout is not None:
+                buffer = process.stdout.read()
+                if len(buffer) > 0:
+                    for line in buffer.splitlines():
+                        if self.debug:
+                            line = " ".join([proc_name, self.timestamp(), line])
+                        self.process_responded.emit(line)
     
     @QtCore.pyqtSlot()
     def toggleDebug(self, debug_state = None):
@@ -220,8 +221,11 @@ class MainButtonWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         # delete any subprocesses as application exits
         for k, process in self.process_dict.items():
-            process.close()
+            process.kill()
         self.process_dict = {}
+        for k, timer in self.timer_dict.items():
+            timer.stop()
+        self.timer_dict = {}
 
 
 def read_settings(ini_file):
