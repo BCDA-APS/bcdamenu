@@ -26,6 +26,7 @@ MAIN_SECTION_LABEL = 'BcdaMenu'
 DEBUG = False
 DEBUG_COLOR_OFF = "white"
 DEBUG_COLOR_ON = "#fec"
+OUTPUT_POLL_INTERVAL_MS = 50    # any way to avoid polling?
 
 
 class MainButtonWindow(QtGui.QMainWindow):
@@ -41,10 +42,8 @@ class MainButtonWindow(QtGui.QMainWindow):
         
         self.command_number = 0
         self.process_dict = {}
+        self.timer_dict = {}
         self.debug = DEBUG
-#         self.environment = QtCore.QProcessEnvironment()
-#         for k, v in os.environ.items():
-#             self.environment.insert(k, v)
 
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
@@ -101,29 +100,43 @@ class MainButtonWindow(QtGui.QMainWindow):
             args = shlex.split(str(command))
             process = subprocess.Popen(
                 args,
+                shell = True,
                 stderr = subprocess.STDOUT,
-                # stdout = subprocess.PIPE,
+                stdout = subprocess.PIPE,
+                universal_newlines = True,
             )
 
-#             process = QtCore.QProcess(self)
-#             self.process_dict[process_name] = process
-#             
-#             process.setReadChannel(QtCore.QProcess.StandardOutput)
-#             process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
-#             process.setProcessEnvironment(self.environment)
-#     
-#             process.error.connect(partial(self.onError, process_name))
-#             process.started.connect(partial(self.onStart, process_name))
-#             # process.stateChanged.connect(partial(self.onStateChanged, process_name))
-#             process.readyRead.connect(partial(self.onUpdate, process_name))
-#             process.finished.connect(partial(self.onFinish, process_name))
-#     
-#             status = process.start(command)
-#             if self.debug:
-#                 self.process_responded.emit("label: |%s|" % label)
-#                 self.process_responded.emit("command: |%s|" % command)
-#                 self.process_responded.emit("state: " + str(process.state()))
-#                 self.process_responded.emit("pid: " + str(process.pid()))
+            self.process_dict[process_name] = process
+            timer = QtCore.QTimer()
+            self.timer_dict[process_name] = timer
+            timer.setSingleShot(False)
+            timer.timeout.connect(partial(self.process_reporter, process_name))
+            timer.start(OUTPUT_POLL_INTERVAL_MS)
+            if self.debug:
+                msg = " ".join([process_name, str(datetime.datetime.now()), "started"])
+                self.process_responded.emit(msg)
+
+
+    @QtCore.pyqtSlot(str)
+    def process_reporter(self, proc_name):
+        """write any process output to history"""
+        if proc_name in self.process_dict:
+            process = self.process_dict[proc_name]
+            buffer = process.stdout.read()
+            if len(buffer) > 0:
+                for line in buffer.splitlines():
+                    if self.debug:
+                        line = " ".join([proc_name, str(datetime.datetime.now()), line])
+                    self.process_responded.emit(line)
+            result = process.poll()
+            if result is not None:
+                if self.debug:
+                    msg = " ".join([proc_name, str(datetime.datetime.now()), "ended"])
+                    self.process_responded.emit(msg)
+                del self.process_dict[proc_name]
+                if proc_name in self.timer_dict:
+                    self.timer_dict[proc_name].stop()
+                    del self.timer_dict[proc_name]
     
     @QtCore.pyqtSlot()
     def toggleDebug(self):
