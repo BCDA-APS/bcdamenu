@@ -7,21 +7,25 @@ BcdaMenu: Creates a GUI menu button to start common beam line software
 import argparse
 from collections import OrderedDict
 import datetime
+from functools import partial
+import os
+import shlex
+import sys
+from PyQt4 import QtGui, QtCore
 try:
     import configparser as iniParser
 except:
     import ConfigParser as iniParser
-from functools import partial
-import os
-import subprocess
-import sys
-from threading import Thread
-from PyQt4 import QtGui, QtCore
-from six import StringIO
+if os.name == 'posix' and sys.version_info[0] < 3:
+    import subprocess32 as subprocess
+else:
+    import subprocess
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
 DEBUG = False
+DEBUG_COLOR_OFF = "white"
+DEBUG_COLOR_ON = "#fec"
 
 
 class MainButtonWindow(QtGui.QMainWindow):
@@ -38,9 +42,9 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.command_number = 0
         self.process_dict = {}
         self.debug = DEBUG
-        self.environment = QtCore.QProcessEnvironment()
-        for k, v in os.environ.items():
-            self.environment.insert(k, v)
+#         self.environment = QtCore.QProcessEnvironment()
+#         for k, v in os.environ.items():
+#             self.environment.insert(k, v)
 
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
@@ -54,9 +58,13 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
         self.historyPane.setReadOnly(True)
-        if not self.debug:
+        if self.debug:
+            self.resize(500,300)
+            self.historyPane.setStyleSheet("background: " + DEBUG_COLOR_ON)
+        else:
             self.hide_history_window()
             self.resize(400,0)
+            self.historyPane.setStyleSheet("background: " + DEBUG_COLOR_OFF)
 
         self.process_responded.connect(self.historyUpdate)
         
@@ -88,30 +96,40 @@ class MainButtonWindow(QtGui.QMainWindow):
         if command is not None:
             self.command_number += 1
             process_name = "id_" + str(self.command_number)
-
-            process = QtCore.QProcess(self)
-            self.process_dict[process_name] = process
             
-            process.setReadChannel(QtCore.QProcess.StandardOutput)
-            process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
-            process.setProcessEnvironment(self.environment)
-    
-            process.error.connect(partial(self.onError, process_name))
-            process.started.connect(partial(self.onStart, process_name))
-            # process.stateChanged.connect(partial(self.onStateChanged, process_name))
-            process.readyRead.connect(partial(self.onUpdate, process_name))
-            process.finished.connect(partial(self.onFinish, process_name))
-    
-            status = process.start(command)
-            if self.debug:
-                self.process_responded.emit("label: |%s|" % label)
-                self.process_responded.emit("command: |%s|" % command)
-                self.process_responded.emit("state: " + str(process.state()))
-                self.process_responded.emit("pid: " + str(process.pid()))
+            # ref: https://docs.python.org/3.3/library/subprocess.html
+            args = shlex.split(str(command))
+            process = subprocess.Popen(
+                args,
+                stderr = subprocess.STDOUT,
+                # stdout = subprocess.PIPE,
+            )
+
+#             process = QtCore.QProcess(self)
+#             self.process_dict[process_name] = process
+#             
+#             process.setReadChannel(QtCore.QProcess.StandardOutput)
+#             process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+#             process.setProcessEnvironment(self.environment)
+#     
+#             process.error.connect(partial(self.onError, process_name))
+#             process.started.connect(partial(self.onStart, process_name))
+#             # process.stateChanged.connect(partial(self.onStateChanged, process_name))
+#             process.readyRead.connect(partial(self.onUpdate, process_name))
+#             process.finished.connect(partial(self.onFinish, process_name))
+#     
+#             status = process.start(command)
+#             if self.debug:
+#                 self.process_responded.emit("label: |%s|" % label)
+#                 self.process_responded.emit("command: |%s|" % command)
+#                 self.process_responded.emit("state: " + str(process.state()))
+#                 self.process_responded.emit("pid: " + str(process.pid()))
     
     @QtCore.pyqtSlot()
     def toggleDebug(self):
         self.debug = not self.debug
+        color = {True: DEBUG_COLOR_ON, False: DEBUG_COLOR_OFF}[self.debug]
+        self.historyPane.setStyleSheet("background: " + color)
 
     def _writeBufferToHistory(self, proc_id, caller_name = None):
         process = self.process_dict[proc_id]
