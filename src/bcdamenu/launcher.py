@@ -7,21 +7,28 @@ BcdaMenu: Creates a GUI menu button to start common beam line software
 import argparse
 from collections import OrderedDict
 import datetime
+from functools import partial
+import os
+import sys
+import threading
+from PyQt4 import QtGui, QtCore
+from six import StringIO
 try:
     import configparser as iniParser
 except:
     import ConfigParser as iniParser
-from functools import partial
-import os
-import subprocess
-import sys
-from threading import Thread
-from PyQt4 import QtGui, QtCore
-from six import StringIO
+if os.name == 'posix' and sys.version_info[0] < 3:
+    import subprocess32 as subprocess
+else:
+    import subprocess
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
 DEBUG = False
+DEBUG = True
+DEBUG_COLOR_OFF = "white"
+DEBUG_COLOR_ON = "#fec"
+OUTPUT_POLL_INTERVAL_MS = 50    # any way to avoid polling?
 
 
 class MainButtonWindow(QtGui.QMainWindow):
@@ -36,12 +43,14 @@ class MainButtonWindow(QtGui.QMainWindow):
             raise ValueError('settings file name must be given')
         
         self.command_number = 0
-        self.process_dict = {}
-        self.debug = DEBUG
-        self.environment = QtCore.QProcessEnvironment()
-        for k, v in os.environ.items():
-            self.environment.insert(k, v)
+        self.command_echo = True
+        self.poll_interval_ms = OUTPUT_POLL_INTERVAL_MS
+        
+        self._init_gui()
 
+        self.reload_settings_file()
+
+    def _init_gui(self):
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
         
@@ -54,9 +63,14 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
         self.historyPane.setReadOnly(True)
-        if not self.debug:
+        self.toggleDebug(DEBUG)
+        if self.debug:
+            self.resize(500,300)
+            self.historyPane.setStyleSheet("background: " + DEBUG_COLOR_ON)
+        else:
             self.hide_history_window()
             self.resize(400,0)
+            self.historyPane.setStyleSheet("background: " + DEBUG_COLOR_OFF)
 
         self.process_responded.connect(self.historyUpdate)
         
@@ -69,111 +83,45 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
         self.admin_menu.addSeparator()
         self.admin_menu.addAction('(Un)hide history panel', self.hide_history_window)
+        self.admin_menu.addAction('command echo', self.toggleEcho)
         self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
         self.user_menus = OrderedDict()
-
-        self.reload_settings_file()
 
     def receiver(self, label, command):
         '''handle commands from menu button'''
         msg = 'BcdaMenu (' 
-        msg += str(datetime.datetime.now())
+        msg += timestamp()
         msg += '), ' + label
         if command is None:
             msg += ': '
         else:
             command = os.path.normpath(command)
         msg += ':  ' + str(command)
-        self.showStatus(msg)
+        self.showStatus(msg, isCommand=True)
         if command is not None:
             self.command_number += 1
             process_name = "id_" + str(self.command_number)
-
-            process = QtCore.QProcess(self)
-            self.process_dict[process_name] = process
             
-            process.setReadChannel(QtCore.QProcess.StandardOutput)
-            process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
-            process.setProcessEnvironment(self.environment)
-    
-            process.error.connect(partial(self.onError, process_name))
-            process.started.connect(partial(self.onStart, process_name))
-            # process.stateChanged.connect(partial(self.onStateChanged, process_name))
-            process.readyRead.connect(partial(self.onUpdate, process_name))
-            process.finished.connect(partial(self.onFinish, process_name))
-    
-            status = process.start(command)
-            if self.debug:
-                self.process_responded.emit("label: |%s|" % label)
-                self.process_responded.emit("command: |%s|" % command)
-                self.process_responded.emit("state: " + str(process.state()))
-                self.process_responded.emit("pid: " + str(process.pid()))
-    
+            # ref: https://docs.python.org/3.3/library/subprocess.html
+            process = CommandThread()
+            process.setName(process_name)
+            process.setDebug(self.debug)
+            process.setParent(self)
+            process.setCommand(command)
+            process.setPollInterval(self.poll_interval_ms)
+            process.start()
+
     @QtCore.pyqtSlot()
-    def toggleDebug(self):
-        self.debug = not self.debug
+    def toggleDebug(self, debug_state = None):
+        self.debug = debug_state or not self.debug
+        color = {True: DEBUG_COLOR_ON, False: DEBUG_COLOR_OFF}[self.debug]
+        self.historyPane.setStyleSheet("background: " + color)
 
-    def _writeBufferToHistory(self, proc_id, caller_name = None):
-        process = self.process_dict[proc_id]
-        if self.debug:
-            self.process_responded.emit("state: " + str(process.state()))
-        buffer = process.readAll()
-        for line in str(buffer).splitlines():
-            msg = line
-            if self.debug:
-                msg = caller_name + ": " + line
-            self.process_responded.emit(msg)
-            if self.debug:
-                print(' '.join([proc_id, caller_name, str(datetime.datetime.now()), line]))
-
-    @QtCore.pyqtSlot(str)
-    def onError(self, proc_id):
-        self.process_responded.emit("error: " + proc_id)
-        if proc_id in self.process_dict:
-            self._writeBufferToHistory(proc_id, "onError")
-            self.process_responded.emit("error string: " + self.process_dict[proc_id].errorString())
-
-            self.process_responded.emit("last error code: " + str(self.process_dict[proc_id].error()))
-            self.process_responded.emit("exitCode: " + str(self.process_dict[proc_id].exitCode()))
-            self.process_responded.emit("exitStatus: " + str(self.process_dict[proc_id].exitStatus()))
-    
-    @QtCore.pyqtSlot(str)
-    def onStart(self, proc_id):
-        if self.debug:
-            self.process_responded.emit("start: " + proc_id)
- 
-    @QtCore.pyqtSlot(str)
-    def onUpdate(self, proc_id):
-        if proc_id not in self.process_dict:
-            msg = proc_id + ' not found during update event!'
-            raise RuntimeError(msg)
-        if self.debug:
-            self._writeBufferToHistory(proc_id, "onUpdate")
-        else:
-            self._writeBufferToHistory(proc_id)
- 
-    @QtCore.pyqtSlot(str)
-    def onFinish(self, proc_id):
-        if proc_id in self.process_dict:
-            self._writeBufferToHistory(proc_id, "onFinish")
-
-            if self.debug:
-                self.process_responded.emit("last error string: " + self.process_dict[proc_id].errorString())
-                self.process_responded.emit("last error code: " + str(self.process_dict[proc_id].error()))
-                self.process_responded.emit("exitCode: " + str(self.process_dict[proc_id].exitCode()))
-                self.process_responded.emit("exitStatus: " + str(self.process_dict[proc_id].exitStatus()))
-
-            del self.process_dict[proc_id]
-            if self.debug:
-                self.showStatus(proc_id + ' ended')
-        else:
-            self.showStatus(proc_id + ' ended but not found in db')
-
-    @QtCore.pyqtSlot(str, int)
-    def onStateChanged(self, process_name, state_number):
-        states = ["NotRunning", "Starting", "Running"]
-        if self.debug:
-            print("change: ", process_name, states[state_number])
+    @QtCore.pyqtSlot()
+    def toggleEcho(self):
+        self.command_echo = not self.command_echo
+        state = {True: "on", False: "off"}[self.command_echo]
+        self.process_responded.emit("command echo: " + state)
 
     def about_box(self):
         '''TODO: should display an About box'''
@@ -184,10 +132,11 @@ class MainButtonWindow(QtGui.QMainWindow):
         msg += '\n  URL: ' + __url__
         self.showStatus(msg)
     
-    def showStatus(self, text):
+    def showStatus(self, text, isCommand=False):
         """write to the status bar"""
         self.statusbar.showMessage(text.splitlines()[0])
-        self.historyUpdate(text)
+        if isCommand and self.command_echo:
+            self.historyUpdate(text)
 
     def historyUpdate(self, text):
         """record history where user can see it"""
@@ -235,10 +184,53 @@ class MainButtonWindow(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot(QtGui.QCloseEvent)
     def closeEvent(self, event):
-        # delete any subprocesses as application exits
-        for k, process in self.process_dict.items():
-            process.close()
-        self.process_dict = {}
+        # TODO: dispose any threads and timers
+        pass
+
+
+class CommandThread(threading.Thread):
+
+    def __init__(self):
+        self.stdout = None
+        self.stderr = None
+        threading.Thread.__init__(self)
+        self.parent = None
+        self.command = None
+        self.poll_interval_ms = OUTPUT_POLL_INTERVAL_MS
+    
+    def setCommand(self, command):
+        self.command = command
+    
+    def setDebug(self, value):
+        self.debug = value
+
+    def setParent(self, parent):
+        self.parent = parent
+
+    def setPollInterval(self, value):
+        self.poll_interval_ms = value
+
+    def run(self):
+        process = subprocess.Popen(
+            self.command,
+            shell = True,
+            bufsize = 1,
+            stderr = subprocess.STDOUT,
+            stdout = subprocess.PIPE,
+            universal_newlines = True,
+        )
+        if self.debug:
+            self.parent.process_responded.emit("started")
+
+        # self.stdout, self.stderr = process.communicate()
+        base = " ".join([self.name, timestamp()])
+        for stdout_line in iter(process.stdout.read, ""):
+            # yield stdout_line
+            if self.debug:
+                stdout_line = base + " " + stdout_line
+            self.parent.process_responded.emit(stdout_line) 
+        process.stdout.close()
+        return_code = process.wait()
 
 
 def read_settings(ini_file):
@@ -297,6 +289,10 @@ def gui(settingsfilename = None):
     the_gui = MainButtonWindow(settingsfilename=settingsfilename)
     the_gui.show()
     sys.exit(app.exec_())
+
+
+def timestamp():
+    return str(datetime.datetime.now())
 
 
 def main():
