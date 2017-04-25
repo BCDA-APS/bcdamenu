@@ -12,7 +12,6 @@ import os
 import sys
 import threading
 from PyQt4 import QtGui, QtCore
-from six import StringIO
 try:
     import configparser as iniParser
 except:
