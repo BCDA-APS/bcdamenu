@@ -24,7 +24,7 @@ else:
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
 DEBUG = False
-DEBUG = True
+#DEBUG = True
 DEBUG_COLOR_OFF = "white"
 DEBUG_COLOR_ON = "#fec"
 OUTPUT_POLL_INTERVAL_MS = 50    # any way to avoid polling?
@@ -88,9 +88,7 @@ class MainButtonWindow(QtGui.QMainWindow):
 
     def receiver(self, label, command):
         '''handle commands from menu button'''
-        msg = 'BcdaMenu (' 
-        msg += timestamp()
-        msg += '), ' + label
+        msg = MAIN_SECTION_LABEL + ' (' + timestamp() + '), ' + label
         if command is None:
             msg += ': '
         else:
@@ -112,7 +110,10 @@ class MainButtonWindow(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def toggleDebug(self, debug_state = None):
-        self.debug = debug_state or not self.debug
+        if debug_state is not None:
+            self.debug = debug_state
+        else:
+            self.debug = not self.debug
         color = {True: DEBUG_COLOR_ON, False: DEBUG_COLOR_OFF}[self.debug]
         self.historyPane.setStyleSheet("background: " + color)
 
@@ -243,7 +244,7 @@ def read_settings(ini_file):
     config.optionxform = str    # do not make labels lower case
     config.read(ini_file)
     
-    settings = dict(title='BcdaMenu', menus='', version='unknown')
+    settings = dict(title=MAIN_SECTION_LABEL, menus='', version='unknown')
     for k, v in config.items(MAIN_SECTION_LABEL):
         settings[k] = v
     settings['menus'] = settings['menus'].split()
@@ -300,7 +301,7 @@ def main():
     version = __init__.__version__
     doc = __doc__.strip().splitlines()[0]
     doc += '\n  v' + version
-    parser = argparse.ArgumentParser(prog='BcdaMenu', description=doc)
+    parser = argparse.ArgumentParser(prog=MAIN_SECTION_LABEL, description=doc)
     parser.add_argument('settingsfile', help="Settings file (.ini)")
     parser.add_argument('-v', '--version', action='version', version=version)
     params = parser.parse_args()
