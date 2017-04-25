@@ -9,9 +9,10 @@ from collections import OrderedDict
 import datetime
 from functools import partial
 import os
-import shlex
 import sys
+import threading
 from PyQt4 import QtGui, QtCore
+from six import StringIO
 try:
     import configparser as iniParser
 except:
@@ -42,10 +43,14 @@ class MainButtonWindow(QtGui.QMainWindow):
             raise ValueError('settings file name must be given')
         
         self.command_number = 0
-        self.process_dict = {}
-        self.timer_dict = {}
         self.command_echo = True
+        self.poll_interval_ms = OUTPUT_POLL_INTERVAL_MS
+        
+        self._init_gui()
 
+        self.reload_settings_file()
+
+    def _init_gui(self):
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
         
@@ -82,15 +87,10 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
         self.user_menus = OrderedDict()
 
-        self.reload_settings_file()
-
-    def timestamp(self):
-        return str(datetime.datetime.now())
-
     def receiver(self, label, command):
         '''handle commands from menu button'''
         msg = 'BcdaMenu (' 
-        msg += self.timestamp()
+        msg += timestamp()
         msg += '), ' + label
         if command is None:
             msg += ': '
@@ -103,49 +103,14 @@ class MainButtonWindow(QtGui.QMainWindow):
             process_name = "id_" + str(self.command_number)
             
             # ref: https://docs.python.org/3.3/library/subprocess.html
-            args = shlex.split(str(command))
-            args = str(command)
-            if self.debug:
-                msg = " ".join([process_name, self.timestamp(), "args", str(args)])
-                self.historyUpdate(msg)
-            process = subprocess.Popen(
-                args,
-                shell = True,
-                stderr = subprocess.STDOUT,
-                # stdout = subprocess.PIPE,
-                universal_newlines = True,
-            )
+            process = CommandThread()
+            process.setName(process_name)
+            process.setDebug(self.debug)
+            process.setParent(self)
+            process.setCommand(command)
+            process.setPollInterval(self.poll_interval_ms)
+            process.start()
 
-            self.process_dict[process_name] = process
-            timer = QtCore.QTimer()
-            self.timer_dict[process_name] = timer
-            timer.setSingleShot(False)
-            timer.timeout.connect(partial(self.process_reporter, process_name))
-            timer.start(OUTPUT_POLL_INTERVAL_MS)
-            if self.debug:
-                msg = " ".join([process_name, self.timestamp(), "started"])
-                self.process_responded.emit(msg)
-
-
-    @QtCore.pyqtSlot(str)
-    def process_reporter(self, proc_name):
-        """write any process output to history"""
-        if proc_name in self.process_dict:
-            process = self.process_dict[proc_name]
-            if process is None:
-                del self.process_dict[proc_name]
-                if proc_name in self.timer_dict:
-                    self.timer_dict[proc_name].stop()
-                    del self.timer_dict[proc_name]
-                return
-            if process.stdout is not None:
-                buffer = process.stdout.read()
-                if len(buffer) > 0:
-                    for line in buffer.splitlines():
-                        if self.debug:
-                            line = " ".join([proc_name, self.timestamp(), line])
-                        self.process_responded.emit(line)
-    
     @QtCore.pyqtSlot()
     def toggleDebug(self, debug_state = None):
         self.debug = debug_state or not self.debug
@@ -219,13 +184,53 @@ class MainButtonWindow(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot(QtGui.QCloseEvent)
     def closeEvent(self, event):
-        # delete any subprocesses as application exits
-        for k, process in self.process_dict.items():
-            process.kill()
-        self.process_dict = {}
-        for k, timer in self.timer_dict.items():
-            timer.stop()
-        self.timer_dict = {}
+        # TODO: dispose any threads and timers
+        pass
+
+
+class CommandThread(threading.Thread):
+
+    def __init__(self):
+        self.stdout = None
+        self.stderr = None
+        threading.Thread.__init__(self)
+        self.parent = None
+        self.command = None
+        self.poll_interval_ms = OUTPUT_POLL_INTERVAL_MS
+    
+    def setCommand(self, command):
+        self.command = command
+    
+    def setDebug(self, value):
+        self.debug = value
+
+    def setParent(self, parent):
+        self.parent = parent
+
+    def setPollInterval(self, value):
+        self.poll_interval_ms = value
+
+    def run(self):
+        process = subprocess.Popen(
+            self.command,
+            shell = True,
+            bufsize = 1,
+            stderr = subprocess.STDOUT,
+            stdout = subprocess.PIPE,
+            universal_newlines = True,
+        )
+        if self.debug:
+            self.parent.process_responded.emit("started")
+
+        # self.stdout, self.stderr = process.communicate()
+        base = " ".join([self.name, timestamp()])
+        for stdout_line in iter(process.stdout.read, ""):
+            # yield stdout_line
+            if self.debug:
+                stdout_line = base + " " + stdout_line
+            self.parent.process_responded.emit(stdout_line) 
+        process.stdout.close()
+        return_code = process.wait()
 
 
 def read_settings(ini_file):
@@ -284,6 +289,10 @@ def gui(settingsfilename = None):
     the_gui = MainButtonWindow(settingsfilename=settingsfilename)
     the_gui.show()
     sys.exit(app.exec_())
+
+
+def timestamp():
+    return str(datetime.datetime.now())
 
 
 def main():
