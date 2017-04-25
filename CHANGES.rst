@@ -9,6 +9,10 @@ Production
 
 :2017.4.0:
 
+    * `#35 <https://github.com/prjemian/spec2nexus/issues/35>`_
+      spawns commands in separate subprocess threads
+    * `#31 <https://github.com/prjemian/spec2nexus/issues/31>`_
+      capture all console output to history panel
     * `#30 <https://github.com/prjemian/spec2nexus/issues/30>`_
       changed buttons into menubar, added history panel
 
