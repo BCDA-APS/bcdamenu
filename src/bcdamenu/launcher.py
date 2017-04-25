@@ -27,7 +27,6 @@ DEBUG = False
 #DEBUG = True
 DEBUG_COLOR_OFF = "white"
 DEBUG_COLOR_ON = "#fec"
-OUTPUT_POLL_INTERVAL_MS = 50    # any way to avoid polling?
 
 
 class MainButtonWindow(QtGui.QMainWindow):
@@ -43,7 +42,6 @@ class MainButtonWindow(QtGui.QMainWindow):
         
         self.command_number = 0
         self.command_echo = True
-        self.poll_interval_ms = OUTPUT_POLL_INTERVAL_MS
         
         self._init_gui()
 
@@ -103,13 +101,13 @@ class MainButtonWindow(QtGui.QMainWindow):
             process = CommandThread()
             process.setName(process_name)
             process.setDebug(self.debug)
-            process.setParent(self)
+            process.setSignal(self.process_responded)
             process.setCommand(command)
-            process.setPollInterval(self.poll_interval_ms)
             process.start()
 
     @QtCore.pyqtSlot()
     def toggleDebug(self, debug_state = None):
+        """change whether (or not) to output diagnostic information"""
         if debug_state is not None:
             self.debug = debug_state
         else:
@@ -119,6 +117,7 @@ class MainButtonWindow(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def toggleEcho(self):
+        """change whether (or not) to echo command before running it"""
         self.command_echo = not self.command_echo
         state = {True: "on", False: "off"}[self.command_echo]
         self.process_responded.emit("command echo: " + state)
@@ -189,48 +188,54 @@ class MainButtonWindow(QtGui.QMainWindow):
 
 
 class CommandThread(threading.Thread):
+    """
+    run the command as a subprocess in its own thread, report any output
+    """
+
+    subprocess_parameters = {
+        'bufsize': 1,
+        'shell': True,
+        'stderr': subprocess.STDOUT,
+        'stdout': subprocess.PIPE,
+        'universal_newlines': True,
+    }
 
     def __init__(self):
         self.stdout = None
         self.stderr = None
         threading.Thread.__init__(self)
-        self.parent = None
+        self.signal = None
         self.command = None
-        self.poll_interval_ms = OUTPUT_POLL_INTERVAL_MS
     
     def setCommand(self, command):
+        """user's command to be run"""
         self.command = command
     
     def setDebug(self, value):
+        """`True` to output more diagnostics"""
         self.debug = value
 
-    def setParent(self, parent):
-        self.parent = parent
-
-    def setPollInterval(self, value):
-        self.poll_interval_ms = value
+    def setSignal(self, signal):
+        """designate the signal to use when subprocess output has been received"""
+        self.signal = signal
 
     def run(self):
-        process = subprocess.Popen(
-            self.command,
-            shell = True,
-            bufsize = 1,
-            stderr = subprocess.STDOUT,
-            stdout = subprocess.PIPE,
-            universal_newlines = True,
-        )
-        if self.debug:
-            self.parent.process_responded.emit("started")
-
-        # self.stdout, self.stderr = process.communicate()
-        base = " ".join([self.name, timestamp()])
-        for stdout_line in iter(process.stdout.read, ""):
-            # yield stdout_line
+        """print any/all output when command is run"""
+        for line in self.execute():
             if self.debug:
-                stdout_line = base + " " + stdout_line
-            self.parent.process_responded.emit(stdout_line) 
-        process.stdout.close()
-        return_code = process.wait()
+                line = " ".join(self.name, timestamp(), line)
+            self.signal.emit(line)
+
+    def execute(self):
+        """run the command in a shell, reporting its output as it comes in"""
+        with subprocess.Popen(self.command, **self.subprocess_parameters) as process:
+            if self.debug:
+                yield self.name + " started"
+            for buffer in iter(process.stdout.readline, ""):
+                for line in buffer.splitlines():
+                    yield line
+            if self.debug:
+                yield self.name + " started"
 
 
 def read_settings(ini_file):
@@ -292,6 +297,7 @@ def gui(settingsfilename = None):
 
 
 def timestamp():
+    """ISO8601-compliant date & time string"""
     return str(datetime.datetime.now())
 
 
