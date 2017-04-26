@@ -81,9 +81,19 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
         self.admin_menu.addSeparator()
         self.admin_menu.addAction('(Un)hide history panel', self.hide_history_window)
-        self.admin_menu.addAction('scroll to new output', self.toggleAutoScroll)
-        self.admin_menu.addAction('command echo', self.toggleEcho)
-        self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
+        
+        action = self.admin_menu.addAction('scroll to new output', self.toggleAutoScroll)
+        action.setCheckable(True)
+        action.setChecked(self.auto_scroll)
+        
+        action = self.admin_menu.addAction('command echo', self.toggleEcho)
+        action.setCheckable(True)
+        action.setChecked(self.command_echo)
+        
+        action = self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
+        action.setCheckable(True)
+        action.setChecked(self.debug)
+        
         self.user_menus = OrderedDict()
 
     def receiver(self, label, command):
@@ -155,6 +165,8 @@ class MainButtonWindow(QtGui.QMainWindow):
             self.historyPane.appendPlainText(text)
             if self.auto_scroll:
                 self.historyPane.ensureCursorVisible()
+                scroll = self.historyPane.verticalScrollBar()
+                scroll.setValue(scroll.maximum())
 
     def hide_history_window(self):
         """toggle the visibility of the history panel"""
@@ -234,7 +246,7 @@ class CommandThread(threading.Thread):
         """print any/all output when command is run"""
         for line in self.execute():
             if self.debug:
-                line = " ".join(self.name, timestamp(), line)
+                line = " ".join([self.name, timestamp(), line])
             self.signal.emit(line)
 
     def execute(self):
@@ -246,7 +258,7 @@ class CommandThread(threading.Thread):
                 for line in buffer.splitlines():
                     yield line
             if self.debug:
-                yield self.name + " started"
+                yield self.name + " finished"
 
 
 def read_settings(ini_file):
