@@ -61,6 +61,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.historyPane.setLineWrapMode(False)
         self.historyPane.setReadOnly(True)
         self.toggleDebug(DEBUG)
+        self.auto_scroll = True
         if self.debug:
             self.resize(500,300)
             self.historyPane.setStyleSheet("background: " + DEBUG_COLOR_ON)
@@ -80,6 +81,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
         self.admin_menu.addSeparator()
         self.admin_menu.addAction('(Un)hide history panel', self.hide_history_window)
+        self.admin_menu.addAction('scroll to new output', self.toggleAutoScroll)
         self.admin_menu.addAction('command echo', self.toggleEcho)
         self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
         self.user_menus = OrderedDict()
@@ -104,6 +106,13 @@ class MainButtonWindow(QtGui.QMainWindow):
             process.setSignal(self.process_responded)
             process.setCommand(command)
             process.start()
+
+    @QtCore.pyqtSlot()
+    def toggleAutoScroll(self):
+        """change whether (or not) to keep new output in view"""
+        self.auto_scroll = not self.auto_scroll
+        state = {True: "on", False: "off"}[self.auto_scroll]
+        self.process_responded.emit("auto scroll: " + state)
 
     @QtCore.pyqtSlot()
     def toggleDebug(self, debug_state = None):
@@ -144,6 +153,8 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.history += text
         if self.historyPane is not None:
             self.historyPane.appendPlainText(text)
+            if self.auto_scroll:
+                self.historyPane.ensureCursorVisible()
 
     def hide_history_window(self):
         """toggle the visibility of the history panel"""
