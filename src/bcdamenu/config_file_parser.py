@@ -75,7 +75,7 @@ class Menu(MenuBase):
         if self.title is None:
             msg = "no title given for menu"
             raise ConfigFileError(msg)
-        if self.title not in config:
+        if not config.has_section(self.title):
             msg = self.title + " menu not found in config file"
             raise ConfigFileError(msg)
         

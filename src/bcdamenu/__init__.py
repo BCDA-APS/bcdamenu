@@ -11,6 +11,7 @@ __author_name__ = __authors__[0]
 __institution__ = u"Advanced Photon Source, Argonne National Laboratory"
 __author_email__= u"jemian@anl.gov"
 __url__         = u"http://BcdaMenu.readthedocs.io"
+__issues__      = u"https://github.com/BCDA-APS/bcdamenu/issues"
 __license__     = u"(c) " + __copyright__
 __license__     += u" (see LICENSE file for details)"
 __platforms__   = 'any'

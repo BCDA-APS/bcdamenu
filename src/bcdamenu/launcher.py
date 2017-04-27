@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-BcdaMenu: Creates a GUI menu button to start common beam line software
+BcdaMenu: Creates a GUI menu button to start common software
 '''
 
 import argparse
@@ -12,10 +12,6 @@ import os
 import sys
 import threading
 from PyQt4 import QtGui, QtCore
-try:
-    import configparser as iniParser
-except:
-    import ConfigParser as iniParser
 if os.name == 'posix' and sys.version_info[0] < 3:
     import subprocess32 as subprocess
 else:
@@ -143,18 +139,15 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.process_responded.emit("command echo: " + state)
 
     def about_box(self):
-        '''TODO: should display an About box'''
+        '''display an About box'''
         from bcdamenu import __version__, __url__
-        # TODO: issue #13
+        import about
         msg = __doc__.strip()
         msg += '\n  version: ' + __version__
         msg += '\n  URL: ' + __url__
         self.showStatus(msg)
-        box = QtGui.QMessageBox()
-        box.setWindowTitle("About " + config_file_parser.MAIN_SECTION_LABEL)
-        box.setText(__doc__.strip())
-        box.setInformativeText(__version__ + "\n" + __url__)
-        box.exec_()
+        ui = about.InfoBox(self)    
+        ui.show()
     
     def showStatus(self, text, isCommand=False):
         """write to the status bar"""
@@ -239,6 +232,8 @@ class CommandThread(threading.Thread):
         threading.Thread.__init__(self)
         self.signal = None
         self.command = None
+        if os.name == 'nt':     # Windows
+            self.subprocess_parameters['shell'] = False
     
     def setCommand(self, command):
         """user's command to be run"""
@@ -261,14 +256,17 @@ class CommandThread(threading.Thread):
 
     def execute(self):
         """run the command in a shell, reporting its output as it comes in"""
-        with subprocess.Popen(self.command, **self.subprocess_parameters) as process:
-            if self.debug:
-                yield self.name + " started"
-            for buffer in iter(process.stdout.readline, ""):
-                for line in buffer.splitlines():
-                    yield line
-            if self.debug:
-                yield self.name + " finished"
+        try:
+            with subprocess.Popen(self.command, **self.subprocess_parameters) as process:
+                if self.debug:
+                    yield self.name + " started"
+                for buffer in iter(process.stdout.readline, ""):
+                    for line in buffer.splitlines():
+                        yield line
+                if self.debug:
+                    yield self.name + " finished"
+        except AttributeError:      # happens on Windows
+            pass
 
 
 def read_settings(ini_file):

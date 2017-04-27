@@ -48,6 +48,7 @@ setup (
          'bcdamenu': [
             'bcdamenu.ini',
             'LICENSE.txt',
+            'about.ui',
             ],
          },
     classifiers      = bcdamenu.__classifiers__,
