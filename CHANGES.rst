@@ -15,6 +15,8 @@ Production
       capture all console output to history panel
     * `#30 <https://github.com/prjemian/spec2nexus/issues/30>`_
       changed buttons into menubar, added history panel
+    * `#13 <https://github.com/prjemian/spec2nexus/issues/13>`_
+      About box added
     * `#12 <https://github.com/prjemian/spec2nexus/issues/12>`_
       **submenu** feature added!
 
