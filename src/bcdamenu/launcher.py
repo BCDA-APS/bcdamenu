@@ -150,11 +150,16 @@ class MainButtonWindow(QtGui.QMainWindow):
         msg += '\n  version: ' + __version__
         msg += '\n  URL: ' + __url__
         self.showStatus(msg)
+        box = QtGui.QMessageBox()
+        box.setWindowTitle("About " + config_file_parser.MAIN_SECTION_LABEL)
+        box.setText(__doc__.strip())
+        box.setInformativeText(__version__ + "\n" + __url__)
+        box.exec_()
     
     def showStatus(self, text, isCommand=False):
         """write to the status bar"""
         self.statusbar.showMessage(text.splitlines()[0])
-        if isCommand and self.command_echo:
+        if not isCommand and self.command_echo:
             self.historyUpdate(text)
 
     def historyUpdate(self, text):
