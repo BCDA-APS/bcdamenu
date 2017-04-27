@@ -3,6 +3,7 @@
 parse the configuration file
 """
 
+from collections import OrderedDict
 try:
     import configparser as iniParser
 except:
@@ -10,10 +11,21 @@ except:
 
 TEST_FILE = "bcdamenu.ini"
 MAIN_SECTION_LABEL = 'BcdaMenu'
+KNOWN_VERSIONS = ("2017.3.0", )
+
+class ConfigFileError(Exception):
+    """general exception from `config_file_parser`"""
+
+class ConfigFileKeyError(ConfigFileError, KeyError):
+    """exception with a key in the configuration file"""
+
+known_menu_names = []
 
 
-class ConfigFileError(Exception): pass
-class ConfigFileKeyError(ConfigFileError, KeyError): pass
+def clearKnownMenuNames():
+    """keep a list of all known menus so a recursive configuration will be found"""
+    global known_menu_names
+    known_menu_names = []
 
 
 class MenuBase(object):
@@ -34,7 +46,7 @@ class Menu(MenuBase):
         self.sectionName = sectionName
         self.setTitle(sectionName)
         self.menuObject = None
-        self.itemDict = {}
+        self.itemDict = OrderedDict()
     
     def __str__(self):
         msg = "Menu("
@@ -58,6 +70,8 @@ class Menu(MenuBase):
         
         :param obj config: instance of ConfigParser()
         """
+        global known_menu_names
+        
         if self.title is None:
             msg = "no title given for menu"
             raise ConfigFileError(msg)
@@ -80,8 +94,11 @@ class Menu(MenuBase):
                 key = 'key_%04d' % int(parts[0])
                 label = k[k.find(' '):].strip()
                 if label == 'submenu':
+                    if v in known_menu_names:
+                        raise ConfigFileKeyError(v + " used more than once")
                     menu = Menu(self, v)
-                    labels[key] = label
+                    known_menu_names.append(v)
+                    labels[key] = v.title
                     commands[key] = menu
                     menu.readConfiguration(config)
                     # print(str(menu))
@@ -136,15 +153,41 @@ class MenuSeparator(MenuBase):
         return msg
 
 
-if __name__ == "__main__":
+def readConfigFile(file_name, ):
+    title = MAIN_SECTION_LABEL
+    version = 'unknown'
+
+    clearKnownMenuNames()
     config = iniParser.ConfigParser(allow_no_value=True)
     config.optionxform = str    # do not make labels lower case
-    config.read(TEST_FILE)
+    config.read(file_name)
     menu_list = []
     for k, v in config.items(MAIN_SECTION_LABEL):
-        if k == "menus":
+        if k == "title":
+            title = v
+        elif k == "version":
+            if v not in KNOWN_VERSIONS:
+                msg = "Unknown version: " + str(v)
+                msg += "  expected one of: " + str(KNOWN_VERSIONS)
+                raise ConfigFileError(msg)
+            version = v
+        elif k == "menus":
             for menu_name in v.split():
+                if menu_name in known_menu_names:
+                    msg = "submenu %s used more than once" % menu_name
+                    raise ConfigFileKeyError(msg)
                 menu = Menu(None, menu_name)
+                known_menu_names.append(menu_name)
                 menu_list.append(menu)
                 menu.readConfiguration(config)
                 # print(str(menu))
+    
+    return dict(menus=menu_list, title=title, version=version)
+
+
+if __name__ == "__main__":
+    cfg = readConfigFile(TEST_FILE)
+    print cfg['title']
+    print cfg['version']
+    for m in cfg['menus']:
+        print m

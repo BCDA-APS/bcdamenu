@@ -20,6 +20,7 @@ if os.name == 'posix' and sys.version_info[0] < 3:
     import subprocess32 as subprocess
 else:
     import subprocess
+import config_file_parser
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
@@ -185,24 +186,28 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.build_user_menus(self.config)
         self.menubar.addMenu(self.admin_menu)
         self.setWindowTitle(self.config['title'])
+    
+    def _build_menu(self, menu, widget):
+        for k, v in menu.itemDict.items():
+            if isinstance(v, config_file_parser.MenuItem):
+                action = widget.addAction(k, partial(self.receiver, k, v.command))
+            elif isinstance(v, config_file_parser.MenuSeparator):
+                widget.addSeparator()
+            elif isinstance(v, config_file_parser.Menu):
+                subwidget = QtGui.QMenu(v.title)
+                self.user_menus[v.sectionName] = subwidget
+                self._build_menu(v, subwidget)
+                widget.addMenu(subwidget)
+            else:
+                raise RuntimeError("unexpected: %s : " % k + str(v))
 
     def build_user_menus(self, config):
         """build the user menus"""
-        for menu_name in config['menus']:
-            menu = QtGui.QMenu(menu_name)
-            self.user_menus[menu_name] = menu
-
-            # fallback to empty list if not found
-            config_list = config.get(menu_name, [])
-            for entry in config_list:
-                k, v = entry
-                if k == 'title':
-                    menu.setTitle(v)
-                elif k == 'separator' and v is None:
-                    menu.addSeparator()
-                else:
-                    action = menu.addAction(k, partial(self.receiver, k, v))
-            self.menubar.addMenu(menu)
+        for menu in config['menus']:
+            widget = QtGui.QMenu(menu.title)
+            self.user_menus[menu.sectionName] = widget
+            self._build_menu(menu, widget)
+            self.menubar.addMenu(widget)
 
     @QtCore.pyqtSlot(QtGui.QCloseEvent)
     def closeEvent(self, event):
@@ -268,46 +273,7 @@ def read_settings(ini_file):
     if not os.path.exists(ini_file):
         raise ValueError('settings file not found: ' + ini_file)
 
-    config = iniParser.ConfigParser(allow_no_value=True)
-    config.optionxform = str    # do not make labels lower case
-    config.read(ini_file)
-    
-    settings = dict(title=MAIN_SECTION_LABEL, menus='', version='unknown')
-    for k, v in config.items(MAIN_SECTION_LABEL):
-        settings[k] = v
-    settings['menus'] = settings['menus'].split()
-
-    for menu_name in settings['menus']:
-        settings[menu_name] = []
-
-        # parse the settings file and coordinate numbered labels with commands
-        labels = {}
-        commands = {}
-        menu_items_dict = dict(config.items(menu_name))
-        for k, v in menu_items_dict.items():
-            if k == 'title':
-                settings[menu_name].append([k, v])
-            else:
-                parts = k.split()
-                if len(parts) < 2:
-                    msg = 'Error in settings file, section [%s]: ' % menu_name + ini_file
-                    msg += '\n  line reading: ' + k + ' = ' + v
-                    raise KeyError(msg)
-                key = 'key_%04d' % int(parts[0])
-                label = k[k.find(' '):].strip()
-                if label == 'submenu':   # TODO: support submenus issue #12
-                    labels[key] = label + ': planned feature #12'
-                    commands[key] = None
-                else:
-                    labels[key] = label
-                    if len(v) == 0:
-                        v = None
-                    commands[key] = v
-    
-        # add the menu items in numerical order
-        for k, label in sorted(labels.items()):
-            settings[menu_name].append([label, commands[k]])
-    
+    settings = config_file_parser.readConfigFile(ini_file)
     return settings
 
 
