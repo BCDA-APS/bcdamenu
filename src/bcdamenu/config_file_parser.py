@@ -13,6 +13,7 @@ MAIN_SECTION_LABEL = 'BcdaMenu'
 
 
 class ConfigFileError(Exception): pass
+class ConfigFileKeyError(ConfigFileError, KeyError): pass
 
 
 class MenuBase(object):
@@ -73,9 +74,9 @@ class Menu(MenuBase):
             else:
                 parts = k.split()
                 if len(parts) < 2:
-                    msg = 'Error in settings file, section [%s]: ' % menu_name + ini_file
+                    msg = 'Error in settings file, section [%s]: ' % menu_name
                     msg += '\n  line reading: ' + k + ' = ' + v
-                    raise KeyError(msg)
+                    raise ConfigFileKeyError(msg)
                 key = 'key_%04d' % int(parts[0])
                 label = k[k.find(' '):].strip()
                 if label == 'submenu':
@@ -147,4 +148,3 @@ if __name__ == "__main__":
                 menu_list.append(menu)
                 menu.readConfiguration(config)
                 # print(str(menu))
-    pass
