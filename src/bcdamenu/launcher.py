@@ -80,7 +80,6 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.setMenuBar(self.menubar)
         self.menubar.setNativeMenuBar(False)    # keep menubar in the window
         
-        self.history = ''
         self.historyPane = QtGui.QPlainTextEdit()
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
@@ -197,9 +196,6 @@ class MainButtonWindow(QtGui.QMainWindow):
 
     def historyUpdate(self, text):
         """record history where user can see it"""
-        if len(self.history) != 0:
-            self.history += '\n'
-        self.history += text
         if self.historyPane is not None:
             self.historyPane.appendPlainText(text)
             if self.auto_scroll:
