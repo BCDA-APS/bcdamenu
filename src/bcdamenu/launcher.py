@@ -182,7 +182,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         ui.setLicenseURL(__license_url__)
         ui.setTitle(config_file_parser.MAIN_SECTION_LABEL)
         ui.setVersionText("software version: " + __version__)
-        ui.setSummaryText(__doc__.strip())
+        ui.setSummaryText(__doc__.strip().splitlines()[0])
         ui.setAuthorText(__author__)
         ui.setCopyrightText(__copyright__)
 
