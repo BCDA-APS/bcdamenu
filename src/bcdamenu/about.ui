@@ -48,7 +48,7 @@
           </font>
          </property>
          <property name="text">
-          <string>BcdaMenu</string>
+          <string>software title</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -78,7 +78,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Creates a GUI menu button to start common software</string>
+          <string>description</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -93,7 +93,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Pete Jemian</string>
+          <string>authors</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -108,7 +108,7 @@
           </font>
          </property>
          <property name="text">
-          <string>(c) 2017, UChicago Argonne, LLC, (see LICENSE.txt file for details)</string>
+          <string>copyright</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

@@ -2,6 +2,16 @@
 
 '''
 BcdaMenu: Creates a GUI menu button to start common software
+
+.. autosummary::
+
+    ~MainButtonWindow
+    ~CommandThread
+    ~read_settings
+    ~gui
+    ~timestamp
+    ~main
+
 '''
 
 import argparse
@@ -28,7 +38,24 @@ DEBUG_COLOR_ON = "#fec"
 
 
 class MainButtonWindow(QtGui.QMainWindow):
-    '''the widget that holds the menu button'''
+    '''
+    the widget that holds the menu button
+    
+    .. autosummary::
+
+        ~receiver
+        ~reload_settings_file
+        ~build_user_menus
+        ~showStatus
+        ~historyUpdate
+        ~toggleAutoScroll
+        ~toggleDebug
+        ~toggleEcho
+        ~hide_history_window
+        ~about_box
+        ~closeEvent
+    
+    '''
 
     process_responded = QtCore.pyqtSignal(str)
 
@@ -141,13 +168,25 @@ class MainButtonWindow(QtGui.QMainWindow):
 
     def about_box(self):
         '''display an About box'''
-        from bcdamenu import __version__, __url__
+        from bcdamenu import (__version__, __url__, __author__, 
+                __issues__, __copyright__, __license_url__)
         import about
         msg = __doc__.strip()
         msg += '\n  version: ' + __version__
         msg += '\n  URL: ' + __url__
         self.showStatus(msg)
-        ui = about.InfoBox(self)    
+
+        ui = about.InfoBox(self)
+
+        ui.setTodoURL(__issues__)
+        ui.setDocumentationURL(__url__)
+        ui.setLicenseURL(__license_url__)
+        ui.setTitle(config_file_parser.MAIN_SECTION_LABEL)
+        ui.setVersionText("software version: " + __version__)
+        ui.setSummaryText(__doc__.strip())
+        ui.setAuthorText(__author__)
+        ui.setCopyrightText(__copyright__)
+
         ui.show()
     
     def showStatus(self, text, isCommand=False):
@@ -217,6 +256,30 @@ class MainButtonWindow(QtGui.QMainWindow):
 class CommandThread(threading.Thread):
     """
     run the command as a subprocess in its own thread, report any output
+    
+    **Usage**
+    
+    ::
+    
+            process = CommandThread()
+            process.setName(process_name)
+            process.setDebug(self.debug)
+            process.setSignal(self.process_responded)
+            process.setCommand(command)
+            process.start()
+
+    :see: https://docs.python.org/3.3/library/subprocess.html
+
+    **Methods**
+    
+    .. autosummary::
+
+        ~run
+        ~execute
+        ~setCommand
+        ~setDebug
+        ~setSignal
+    
     """
 
     subprocess_parameters = {

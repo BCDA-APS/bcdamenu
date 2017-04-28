@@ -4,22 +4,52 @@
 
 '''
 show the About box
+    
+**Usage** (example)
+
+::
+
+    ui = about.InfoBox(self)
+
+    ui.setTodoURL(__issues__)
+    ui.setDocumentationURL(__url__)
+    ui.setLicenseURL(__license_url__)
+    ui.setTitle(config_file_parser.MAIN_SECTION_LABEL)
+    ui.setVersionText("software version: " + __version__)
+    ui.setSummaryText(__doc__.strip())
+    ui.setAuthorText(__author__)
+    ui.setCopyrightText(__copyright__)
+
+    ui.show()
+
+.. autosummary::
+
+    ~InfoBox
+    ~loadUi
+
 '''
 
 import os, sys
 from PyQt4 import QtCore, QtGui, uic
 
-from bcdamenu import __version__, __url__, __issues__
-
 UI_FILE = os.path.join(os.path.dirname(__file__), 'about.ui')
-DOCS_URL = __url__
-ISSUES_URL = __issues__
-LICENSE_FILE = os.path.join(os.path.dirname(__file__), 'LICENSE.txt')
 
 
 class InfoBox(QtGui.QDialog):
     '''
     a Qt GUI for the About box
+    
+    .. autosummary::
+    
+       ~setTodoURL
+       ~setDocumentationURL
+       ~setLicenseURL
+       ~setTitle
+       ~setVersionText
+       ~setSummaryText
+       ~setAuthorText
+       ~setCopyrightText
+      
     '''
 
     def __init__(self, parent=None, settings=None):
@@ -27,9 +57,8 @@ class InfoBox(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
         loadUi(UI_FILE, baseinstance=self)
         
-        self.license_box = None
-        
-        self.version.setText('software version: ' + str(__version__))
+        self.license_url = None
+        self.documentation_url = None
 
         self.docs_pb.clicked.connect(self.doDocsUrl)
         self.issues_pb.clicked.connect(self.doIssuesUrl)
@@ -40,8 +69,6 @@ class InfoBox(QtGui.QDialog):
         '''
         called when user clicks the big [X] to quit
         '''
-        if self.license_box is not None:
-            self.license_box.close()
         event.accept() # let the window close
 
     def doUrl(self, url):
@@ -51,29 +78,52 @@ class InfoBox(QtGui.QDialog):
         service.openUrl(url)
 
     def doDocsUrl(self):
-        '''opening documentation URL in default browser'''
-        self.doUrl(DOCS_URL)
+        '''show documentation URL in default browser'''
+        if self.documentation_url is not None:
+            self.doUrl(self.documentation_url)
 
     def doIssuesUrl(self):
-        '''opening issues URL in default browser'''
-        self.doUrl(ISSUES_URL)
+        '''show issues URL in default browser'''
+        if self.issues_url is not None:
+            self.doUrl(self.issues_url)
 
     def doLicense(self):
-        '''show the license'''
-        # if self.license_box is None:
-        #     lfile = resources.resource_file(LICENSE_FILE, '.')
-        #     license_text = open(lfile, 'r').read()
-        #     ui = plainTextEdit.TextWindow(None, 
-        #                                   'LICENSE', 
-        #                                   license_text, 
-        #                                   self.settings)
-        #     ui.setMinimumSize(700, 500)
-        #     self.license_box = ui
-        #     #ui.setWindowModality(QtCore.Qt.ApplicationModal)
-        # self.license_box.show()
-        license_url = "https://raw.githubusercontent.com/BCDA-APS/bcdamenu"
-        license_url += "/master/src/bcdamenu/LICENSE.txt"
-        self.doUrl(license_url)
+        '''show the license URL in default browser'''
+        if self.license_url is not None:
+            self.doUrl(self.license_url)
+
+    def setTodoURL(self, url):
+        """set the URL for the issue tracker"""
+        self.issues_url = url
+
+    def setDocumentationURL(self, url):
+        """set the URL for the documentation"""
+        self.documentation_url = url
+        self.docs_pb.setText("Docs:  " + url + " ...")
+
+    def setLicenseURL(self, url):
+        """set the URL for the software license text"""
+        self.license_url = url
+
+    def setTitle(self, text):
+        """set the title in the About box"""
+        self.title.setText(text)
+
+    def setVersionText(self, text):
+        """set the version text in the About box"""
+        self.version.setText(text)
+
+    def setSummaryText(self, text):
+        """set the description in the About box"""
+        self.description.setText(text)
+
+    def setAuthorText(self, text):
+        """set the author list in the About box"""
+        self.authors.setText(text)
+
+    def setCopyrightText(self, text):
+        """set the copyright string in the About box"""
+        self.copyright.setText(text)
 
 
 def loadUi(ui_file, baseinstance=None, **kw):
@@ -95,7 +145,7 @@ def loadUi(ui_file, baseinstance=None, **kw):
     #. Create a python class of the same type as the widget you created in the .ui file.
     #. When initializing the python class, use uic to dynamically load the .ui file onto the class.
 
-    Here is an example from this code:
+    Here is an example:
 
     .. code-block:: python
         :linenos:

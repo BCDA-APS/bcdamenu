@@ -1,6 +1,18 @@
 
 """
 parse the configuration file
+
+.. autosummary::
+
+    ~readConfigFile
+    ~ConfigFileError
+    ~ConfigFileKeyError
+    ~clearKnownMenuNames
+    ~MenuBase
+    ~Menu
+    ~MenuItem
+    ~MenuSeparator
+
 """
 
 from collections import OrderedDict
@@ -29,6 +41,7 @@ def clearKnownMenuNames():
 
 
 class MenuBase(object):
+    """base class for menu definitions"""
     
     kind = None
     
@@ -38,6 +51,15 @@ class MenuBase(object):
 
 
 class Menu(MenuBase):
+    """
+    specifications of a menu or submenu
+    
+    .. autosummary::
+
+        ~setTitle
+        ~readConfiguration
+
+    """
     
     kind = 'menu'
 
@@ -45,7 +67,6 @@ class Menu(MenuBase):
         MenuBase.__init__(self, parent=parent)
         self.sectionName = sectionName
         self.setTitle(sectionName)
-        self.menuObject = None
         self.itemDict = OrderedDict()
     
     def __str__(self):
@@ -59,11 +80,9 @@ class Menu(MenuBase):
         return msg
 
     def setTitle(self, title):
+        """set the text of this menu's title"""
         self.title = title
 
-    def setMenuObject(self, obj):
-        self.menuObject = obj
-    
     def readConfiguration(self, config):
         """
         read the menu's section from the config file
@@ -119,6 +138,15 @@ class Menu(MenuBase):
 
 
 class MenuItem(MenuBase):
+    """
+    specification of one item in a a menu (or submenu)
+    
+    .. autosummary::
+
+        ~setCommand
+        ~setLabel
+
+    """
     
     kind = 'command'
 
@@ -135,13 +163,18 @@ class MenuItem(MenuBase):
         return msg
 
     def setLabel(self, label):
+        """set the text to appear in the menu (called in constructor)"""
         self.label = label
 
     def setCommand(self, command):
+        """set the text of the command to be executed when this menu item is selected"""
         self.command = command
 
 
 class MenuSeparator(MenuBase):
+    """
+    specification of a separator line in a menu
+    """
     
     kind = 'separator'
 

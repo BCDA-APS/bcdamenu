@@ -69,6 +69,9 @@ or "`=`" separator characters.  The comment characters allowed by the
    Each menu section must have a one-word name with no
    internal white space (to simplify the
    parsing of names in the `[BcdaMenu]` section.
+   All menu (and submenu) sections must be unique with
+   the settings file.  If the same name is used in more than one section,
+   a `configparser.DuplicateSectionError` exception will be raised.
 
 :other sections: will be ignored
 
@@ -92,12 +95,14 @@ menu section.
    :index: an integer used to sort the list numerically (increasing)
    :label: text that appears in the menu
    
-      NOTE: `submenu` is a special label for a feature
-      yet to be supported.  The value defines the name of the 
-      submenu section to insert at this position in the menu.
-      
       * `title` is reserved word and cannot be used as a menu item label
       * `separator` is reserved word and cannot be used as a menu item label
+      * `submenu` Specifies that a submenu will be inserted at this position in the menu.
+        For `submenu`, the `command` gives the name of the menu section to be used.
+        
+        **NOTE** Do not use the same submenu more than once.
+        This will raise a `ConfigFileKeyError` exception when reading the
+        settings file.
    
    :command: Operating system command to be executed when menu 
       item is chosen.  This is a complete command in the operating
@@ -131,9 +136,7 @@ file
 
 The example settings file (highlighted lines show the 
 sections, lines 1, 6, & 19 and the specification of 
-the popup menus, line 4) is shown next.  Note that the
-submenu (referenced on line 16 with content specified
-on line 23) is an unimplemented feature at this time.
+the popup menus, line 4) is shown next.
 
 .. literalinclude:: ../../src/bcdamenu/bcdamenu.ini
    :language: ini
@@ -145,7 +148,7 @@ screens
 
 This settings file produces a GUI titled *9-ID-C USAXS menu*
 with two user menus: *USAXS* and *linux*.  The following
-screen views are from an early version, running on MS Windows.
+screen views are from Linux.
 
 .. _example_gui:
 
@@ -189,3 +192,7 @@ These items are available in the *Help* popup menu:
 
 * *About ...* : prints to the console basic information about this program
 * *Reload User Menus* : reloads the settings file (use this when editing/revising that file)
+* *(Un)hide history panel* : if checked, show a history panel with command output
+* *scroll to new output* : if checked, always scroll when new output is received
+* *command echo* : if checked, show command in history when executed
+* *toggle Debug flag* : if checked, turns on diagnostic output
