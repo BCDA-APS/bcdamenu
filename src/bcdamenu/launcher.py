@@ -170,7 +170,8 @@ class MainButtonWindow(QtGui.QMainWindow):
         from bcdamenu import (__version__, __url__, __author__, 
                 __issues__, __copyright__, __license_url__)
         import about
-        msg = __doc__.strip()
+        summary = __doc__.strip().splitlines()[0]  # 1st line only
+        msg = summary
         msg += '\n  version: ' + __version__
         msg += '\n  URL: ' + __url__
         self.showStatus(msg)
@@ -182,7 +183,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         ui.setLicenseURL(__license_url__)
         ui.setTitle(config_file_parser.MAIN_SECTION_LABEL)
         ui.setVersionText("software version: " + __version__)
-        ui.setSummaryText(__doc__.strip().splitlines()[0])
+        ui.setSummaryText(summary)
         ui.setAuthorText(__author__)
         ui.setCopyrightText(__copyright__)
 
