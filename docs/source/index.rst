@@ -71,6 +71,7 @@ Contents
 
    settings
    examples
+   history
    install
    source_code/*
    changes
