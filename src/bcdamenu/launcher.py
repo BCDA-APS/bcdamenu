@@ -12,9 +12,10 @@ import os
 import sys
 import threading
 from PyQt4 import QtGui, QtCore
-if os.name == 'posix' and sys.version_info[0] < 3:
+#if os.name == 'posix' and sys.version_info[0] < 3:
+try:
     import subprocess32 as subprocess
-else:
+except:
     import subprocess
 import config_file_parser
 
