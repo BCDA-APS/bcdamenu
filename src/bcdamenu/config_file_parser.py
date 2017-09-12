@@ -110,12 +110,14 @@ class Menu(MenuBase):
                     msg = 'Error in settings file, section [%s]: ' % menu_name
                     msg += '\n  line reading: ' + k + ' = ' + v
                     raise ConfigFileKeyError(msg)
-                key = 'key_%04d' % int(parts[0])
+                order_code = int(parts[0])
+                key = 'key_%04d' % order_code
                 label = k[k.find(' '):].strip()
                 if label == 'submenu':
                     if v in known_menu_names:
                         raise ConfigFileKeyError(v + " used more than once")
                     menu = Menu(self, v)
+                    menu.order = order_code
                     known_menu_names.append(v)
                     labels[key] = v.title
                     commands[key] = menu
@@ -123,18 +125,21 @@ class Menu(MenuBase):
                     # print(str(menu))
                 elif label == 'separator':
                     labels[key] = label
-                    commands[key] = MenuSeparator(self)
+                    item = MenuSeparator(self)
+                    commands[key] = item
                 else:
                     labels[key] = label
                     if len(v) == 0:
                         v = None
                     item = MenuItem(self)
                     item.setCommand(v)
+                    item.setLabel(label)
+                    item.order = order_code
                     commands[key] = item
     
         # add the menu items in numerical order
         for k, label in sorted(labels.items()):
-            self.itemDict[label] = commands[k]
+            self.itemDict[k] = commands[k]
 
 
 class MenuItem(MenuBase):

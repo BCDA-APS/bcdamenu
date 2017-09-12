@@ -225,7 +225,9 @@ class MainButtonWindow(QtGui.QMainWindow):
     def _build_menu(self, menu, widget):
         for k, v in menu.itemDict.items():
             if isinstance(v, config_file_parser.MenuItem):
-                action = widget.addAction(k, partial(self.receiver, k, v.command))
+                action = widget.addAction(
+                    v.label, 
+                    partial(self.receiver, v.label, v.command))
             elif isinstance(v, config_file_parser.MenuSeparator):
                 widget.addSeparator()
             elif isinstance(v, config_file_parser.Menu):
