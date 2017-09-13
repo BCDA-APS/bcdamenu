@@ -14,8 +14,8 @@ __url__         = u"http://BcdaMenu.readthedocs.io"
 __issues__      = u"https://github.com/BCDA-APS/bcdamenu/issues"
 __license__     = u"(c) " + __copyright__
 __license__     = u"(c) " + __copyright__
-__license_url__ = u"https://raw.githubusercontent.com/BCDA-APS/bcdamenu"
-__license_url__ += u"/master/src/bcdamenu/LICENSE.txt"
+__license_url__ = u"https://github.com/BCDA-APS/bcdamenu"
+__license_url__ += u"/blob/master/src/bcdamenu/LICENSE.txt"
 __platforms__   = 'any'
 __zip_safe__    = False
 
