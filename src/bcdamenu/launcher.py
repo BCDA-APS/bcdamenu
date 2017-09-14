@@ -27,7 +27,7 @@ try:
     import subprocess32 as subprocess
 except:
     import subprocess
-import config_file_parser
+from . import config_file_parser
 
 
 MAIN_SECTION_LABEL = 'BcdaMenu'
@@ -169,7 +169,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         '''display an About box'''
         from bcdamenu import (__version__, __url__, __author__, 
                 __issues__, __copyright__, __license_url__)
-        import about
+        from . import about
         summary = __doc__.strip().splitlines()[0]  # 1st line only
         msg = summary
         msg += '\n  version: ' + __version__
@@ -358,8 +358,8 @@ def timestamp():
 
 def main():
     '''process any command line options before starting the GUI'''
-    import __init__
-    version = __init__.__version__
+    from .__init__ import __version__
+    version = __version__
     doc = __doc__.strip().splitlines()[0]
     doc += '\n  v' + version
     parser = argparse.ArgumentParser(prog=MAIN_SECTION_LABEL, description=doc)
