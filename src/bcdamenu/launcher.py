@@ -21,7 +21,11 @@ from functools import partial
 import os
 import sys
 import threading
-from PyQt4 import QtGui, QtCore
+try:
+    from PyQt4 import QtGui, QtCore
+except ModuleNotFoundError:
+    from PyQt5 import QtGui, QtCore
+    raise NotImplementedError("code not ready yet for PyQt5")
 #if os.name == 'posix' and sys.version_info[0] < 3:
 try:
     import subprocess32 as subprocess
