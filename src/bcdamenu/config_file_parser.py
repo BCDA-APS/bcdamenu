@@ -225,7 +225,7 @@ def readConfigFile(file_name, ):
 
 if __name__ == "__main__":
     cfg = readConfigFile(TEST_FILE)
-    print cfg['title']
-    print cfg['version']
+    print(cfg['title'])
+    print(cfg['version'])
     for m in cfg['menus']:
-        print m
+        print(m)
