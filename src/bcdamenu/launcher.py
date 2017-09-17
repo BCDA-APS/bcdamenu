@@ -102,9 +102,15 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.menubar.addMenu(self.admin_menu)
         self.admin_menu.addAction('About ...', self.about_box)
         self.admin_menu.addSeparator()
-        self.admin_menu.addAction('Reload User Menus', self.reload_settings_file)
+        self.admin_menu.addAction('&Reload User Menus', self.reload_settings_file)
         self.admin_menu.addSeparator()
-        self.admin_menu.addAction('(Un)hide history panel', self.hide_history_window)
+        self.admin_menu.addAction('(Un)hide &History panel', self.hide_history_window)
+
+        # keyboard shortcuts
+        cut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R), self)
+        self.connect(cut, QtCore.SIGNAL('activated()'), self.reload_settings_file)
+        cut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_H), self)
+        self.connect(cut, QtCore.SIGNAL('activated()'), self.hide_history_window)
         
         action = self.admin_menu.addAction('scroll to new output', self.toggleAutoScroll)
         action.setCheckable(True)
@@ -114,7 +120,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         action.setCheckable(True)
         action.setChecked(self.command_echo)
         
-        action = self.admin_menu.addAction('toggle Debug flag', self.toggleDebug)
+        action = self.admin_menu.addAction('toggle &Debug flag', self.toggleDebug)
         action.setCheckable(True)
         action.setChecked(self.debug)
         
