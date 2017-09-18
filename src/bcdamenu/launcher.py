@@ -304,6 +304,7 @@ class CommandThread(threading.Thread):
         self.stderr = None
         threading.Thread.__init__(self)
         self.signal = None
+        self.debug = False
         self.command = None
         if os.name == 'nt':     # Windows
             self.subprocess_parameters['shell'] = False
@@ -322,10 +323,12 @@ class CommandThread(threading.Thread):
 
     def run(self):
         """print any/all output when command is run"""
+        self.signal.emit("thread %s starting" % self.name)
         for line in self.execute():
             if self.debug:
                 line = " ".join([self.name, timestamp(), line])
             self.signal.emit(line)
+        self.signal.emit("thread %s ended" % self.name)
 
     def execute(self):
         """run the command in a shell, reporting its output as it comes in"""
