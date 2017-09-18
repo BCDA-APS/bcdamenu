@@ -115,6 +115,8 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.connect(cut, QtCore.SIGNAL('activated()'), self.reload_settings_file)
         cut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_H), self)
         self.connect(cut, QtCore.SIGNAL('activated()'), self.hide_history_window)
+        cut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_D), self)
+        self.connect(cut, QtCore.SIGNAL('activated()'), self.toggleDebug)
         
         action = self.admin_menu.addAction('scroll to new output', self.toggleAutoScroll)
         action.setCheckable(True)
@@ -323,12 +325,14 @@ class CommandThread(threading.Thread):
 
     def run(self):
         """print any/all output when command is run"""
-        self.signal.emit("thread %s starting" % self.name)
+        if self.debug:
+            self.signal.emit("thread %s starting" % self.name)
         for line in self.execute():
             if self.debug:
-                line = " ".join([self.name, timestamp(), line])
+                line = " ".join([self.name, timestamp(), ":", line])
             self.signal.emit(line)
-        self.signal.emit("thread %s ended" % self.name)
+        if self.debug:
+            self.signal.emit("thread %s ended" % self.name)
 
     def execute(self):
         """run the command in a shell, reporting its output as it comes in"""
