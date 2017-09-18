@@ -291,7 +291,7 @@ class CommandThread(threading.Thread):
     
     """
 
-    subprocess_parameters = {
+    kwargs = {
         'bufsize': 1,
         'shell': True,
         'stderr': subprocess.STDOUT,
@@ -307,7 +307,7 @@ class CommandThread(threading.Thread):
         self.debug = False
         self.command = None
         if os.name == 'nt':     # Windows
-            self.subprocess_parameters['shell'] = False
+            self.kwargs['shell'] = False
     
     def setCommand(self, command):
         """user's command to be run"""
@@ -332,17 +332,27 @@ class CommandThread(threading.Thread):
 
     def execute(self):
         """run the command in a shell, reporting its output as it comes in"""
-        try:
-            with subprocess.Popen(self.command, **self.subprocess_parameters) as process:
-                if self.debug:
-                    yield self.name + " started"
-                for buffer in iter(process.stdout.readline, ""):
-                    for line in buffer.splitlines():
-                        yield line
-                if self.debug:
-                    yield self.name + " finished"
-        except AttributeError:      # happens on Windows
-            pass
+        if self.debug:
+            yield self.name + " started"
+        process = subprocess.Popen(self.command, **self.kwargs)
+        while not process.stdout.closed:
+            stdoutdata, stderrdata = process.communicate()
+            if stdoutdata is not None:
+                for line in stdoutdata.splitlines():
+                    yield line
+        if self.debug:
+            yield self.name + " finished"
+        # try:
+        #     with subprocess.Popen(self.command, **self.kwargs) as process:
+        #         if self.debug:
+        #             yield self.name + " started"
+        #         for buffer in iter(process.stdout.readline, ""):
+        #             for line in buffer.splitlines():
+        #                 yield line
+        #         if self.debug:
+        #             yield self.name + " finished"
+        # except AttributeError:      # happens on Windows
+        #     pass
 
 
 def read_settings(ini_file):
