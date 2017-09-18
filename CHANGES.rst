@@ -7,6 +7,13 @@ Change History
 Production
 **********
 
+:2017.9.0:
+
+    * `#43 <https://github.com/prjemian/spec2nexus/issues/43>`_
+      no output to command history
+    * `#42 <https://github.com/prjemian/spec2nexus/issues/42>`_
+      only one separator line is added, even if multiple are described
+
 :2017.4.0:
 
     * `#35 <https://github.com/prjemian/spec2nexus/issues/35>`_
