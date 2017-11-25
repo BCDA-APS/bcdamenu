@@ -23,7 +23,7 @@ import sys
 import threading
 try:
     from PyQt4 import QtGui, QtCore
-except ModuleNotFoundError:
+except ImportError:
     from PyQt5 import QtGui, QtCore
     raise NotImplementedError("code not ready yet for PyQt5")
 #if os.name == 'posix' and sys.version_info[0] < 3:
