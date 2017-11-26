@@ -21,12 +21,15 @@ from functools import partial
 import os
 import sys
 import threading
+
 try:
-    from PyQt4 import QtGui, QtCore
+    from PyQt5.QtCore import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtWidgets import *
 except ImportError:
-    from PyQt5 import QtGui, QtCore
-    raise NotImplementedError("code not ready yet for PyQt5")
-#if os.name == 'posix' and sys.version_info[0] < 3:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+
 try:
     import subprocess32 as subprocess
 except:
@@ -41,7 +44,7 @@ DEBUG_COLOR_OFF = "white"
 DEBUG_COLOR_ON = "#fec"
 
 
-class MainButtonWindow(QtGui.QMainWindow):
+class MainButtonWindow(QMainWindow):
     '''
     the widget that holds the menu button
     
@@ -61,10 +64,10 @@ class MainButtonWindow(QtGui.QMainWindow):
     
     '''
 
-    process_responded = QtCore.pyqtSignal(str)
+    process_responded = pyqtSignal(str)
 
     def __init__(self, parent=None, settingsfilename=None):
-        QtGui.QMainWindow.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
         self.settingsfilename = settingsfilename
         if settingsfilename is None:
             raise ValueError('settings file name must be given')
@@ -77,14 +80,14 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.reload_settings_file()
 
     def _init_gui(self):
-        self.statusbar = QtGui.QStatusBar()
+        self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
         
-        self.menubar = QtGui.QMenuBar()
+        self.menubar = QMenuBar()
         self.setMenuBar(self.menubar)
         self.menubar.setNativeMenuBar(False)    # keep menubar in the window
         
-        self.historyPane = QtGui.QPlainTextEdit()
+        self.historyPane = QPlainTextEdit()
         self.setCentralWidget(self.historyPane)
         self.historyPane.setLineWrapMode(False)
         self.historyPane.setReadOnly(True)
@@ -102,7 +105,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         
         self.showStatus('starting %s ...' % sys.argv[0])
         
-        self.admin_menu  = QtGui.QMenu('Help')
+        self.admin_menu  = QMenu('Help')
         self.menubar.addMenu(self.admin_menu)
         self.admin_menu.addAction('About ...', self.about_box)
         self.admin_menu.addSeparator()
@@ -111,12 +114,12 @@ class MainButtonWindow(QtGui.QMainWindow):
         self.admin_menu.addAction('(Un)hide &History panel', self.hide_history_window)
 
         # keyboard shortcuts
-        cut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_R), self)
-        self.connect(cut, QtCore.SIGNAL('activated()'), self.reload_settings_file)
-        cut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_H), self)
-        self.connect(cut, QtCore.SIGNAL('activated()'), self.hide_history_window)
-        cut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.Key_D), self)
-        self.connect(cut, QtCore.SIGNAL('activated()'), self.toggleDebug)
+        cut = QShortcut(QKeySequence("Ctrl+R"), self)
+        cut.activated.connect(self.reload_settings_file)
+        cut = QShortcut(QKeySequence("Ctrl+H"), self)
+        cut.activated.connect(self.hide_history_window)
+        cut = QShortcut(QKeySequence("Ctrl+D"), self)
+        cut.activated.connect(self.toggleDebug)
         
         action = self.admin_menu.addAction('scroll to new output', self.toggleAutoScroll)
         action.setCheckable(True)
@@ -153,14 +156,14 @@ class MainButtonWindow(QtGui.QMainWindow):
             process.setCommand(command)
             process.start()
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def toggleAutoScroll(self):
         """change whether (or not) to keep new output in view"""
         self.auto_scroll = not self.auto_scroll
         state = {True: "on", False: "off"}[self.auto_scroll]
         self.process_responded.emit("auto scroll: " + state)
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def toggleDebug(self, debug_state = None):
         """change whether (or not) to output diagnostic information"""
         if debug_state is not None:
@@ -170,7 +173,7 @@ class MainButtonWindow(QtGui.QMainWindow):
         color = {True: DEBUG_COLOR_ON, False: DEBUG_COLOR_OFF}[self.debug]
         self.historyPane.setStyleSheet("background: " + color)
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def toggleEcho(self):
         """change whether (or not) to echo command before running it"""
         self.command_echo = not self.command_echo
@@ -243,7 +246,7 @@ class MainButtonWindow(QtGui.QMainWindow):
             elif isinstance(v, config_file_parser.MenuSeparator):
                 widget.addSeparator()
             elif isinstance(v, config_file_parser.Menu):
-                subwidget = QtGui.QMenu(v.title)
+                subwidget = QMenu(v.title)
                 self.user_menus[v.sectionName] = subwidget
                 self._build_menu(v, subwidget)
                 widget.addMenu(subwidget)
@@ -253,12 +256,12 @@ class MainButtonWindow(QtGui.QMainWindow):
     def build_user_menus(self, config):
         """build the user menus"""
         for menu in config['menus']:
-            widget = QtGui.QMenu(menu.title)
+            widget = QMenu(menu.title)
             self.user_menus[menu.sectionName] = widget
             self._build_menu(menu, widget)
             self.menubar.addMenu(widget)
 
-    @QtCore.pyqtSlot(QtGui.QCloseEvent)
+    @pyqtSlot(QCloseEvent)
     def closeEvent(self, event):
         # TODO: dispose any threads and timers
         pass
@@ -372,7 +375,7 @@ def read_settings(ini_file):
 
 def gui(settingsfilename = None):
     '''display the main widget'''
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     the_gui = MainButtonWindow(settingsfilename=settingsfilename)
     the_gui.show()
     sys.exit(app.exec_())
