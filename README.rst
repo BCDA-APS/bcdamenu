@@ -20,6 +20,9 @@ Package Information
 * **source**        https://github.com/BCDA-APS/bcdamenu
 
 * **release badges**
+   .. image:: https://img.shields.io/pypi/pyversions/bcdamenu.svg
+      :target: https://pypi.python.org/pypi/bcdamenu
+      :alt: PyPI version
    .. image:: https://img.shields.io/github/tag/BCDA-APS/bcdamenu.svg
       :target: https://github.com/BCDA-APS/bcdamenu/tags
       :alt: https://github.com/BCDA-APS/bcdamenu/tags
