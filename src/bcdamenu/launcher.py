@@ -114,12 +114,13 @@ class MainButtonWindow(QMainWindow):
         self.admin_menu.addAction('(Un)hide &History panel', self.hide_history_window)
 
         # keyboard shortcuts
-        cut = QShortcut(QKeySequence("Ctrl+R"), self)
-        cut.activated.connect(self.reload_settings_file)
-        cut = QShortcut(QKeySequence("Ctrl+H"), self)
-        cut.activated.connect(self.hide_history_window)
-        cut = QShortcut(QKeySequence("Ctrl+D"), self)
-        cut.activated.connect(self.toggleDebug)
+        def shortcut(sequence, action):
+            cut = QShortcut(QKeySequence(sequence), self)
+            cut.activated.connect(action)
+            return cut
+        shortcut("Ctrl+R", self.reload_settings_file)
+        shortcut("Ctrl+H", self.hide_history_window)
+        shortcut("Ctrl+D", self.toggleDebug)
         
         action = self.admin_menu.addAction('scroll to new output', self.toggleAutoScroll)
         action.setCheckable(True)
