@@ -1,5 +1,5 @@
 
-# Copyright (c) 2017, UChicago Argonne, LLC.
+# Copyright (c) 2017-2019, UChicago Argonne, LLC.
 # See LICENSE.txt file for details.
 
 '''
@@ -25,17 +25,25 @@ show the About box
 .. autosummary::
 
     ~InfoBox
-    ~loadUi
+    ~myLoadUi
 
 '''
 
 import os, sys
-from PyQt4 import QtCore, QtGui, uic
+try:
+    from PyQt5.QtCore import QUrl
+    from PyQt5.QtWidgets import QDialog
+    from PyQt5.QtGui import QDesktopServices
+    from PyQt5.uic import loadUi as uicLoadUi
+except ImportError:
+    from PyQt4.QtCore import QUrl
+    from PyQt4.QtGui import QDialog, QDesktopServices
+    from PyQt4.uic import loadUi as uicLoadUi
 
 UI_FILE = os.path.join(os.path.dirname(__file__), 'about.ui')
 
 
-class InfoBox(QtGui.QDialog):
+class InfoBox(QDialog):
     '''
     a Qt GUI for the About box
     
@@ -54,8 +62,8 @@ class InfoBox(QtGui.QDialog):
 
     def __init__(self, parent=None, settings=None):
         self.settings = settings
-        QtGui.QDialog.__init__(self, parent)
-        loadUi(UI_FILE, baseinstance=self)
+        QDialog.__init__(self, parent)
+        myLoadUi(UI_FILE, baseinstance=self)
         
         self.license_url = None
         self.documentation_url = None
@@ -73,8 +81,8 @@ class InfoBox(QtGui.QDialog):
 
     def doUrl(self, url):
         '''opening URL in default browser'''
-        url = QtCore.QUrl(url)
-        service = QtGui.QDesktopServices()
+        url = QUrl(url)
+        service = QDesktopServices()
         service.openUrl(url)
 
     def doDocsUrl(self):
@@ -114,7 +122,8 @@ class InfoBox(QtGui.QDialog):
         self.version.setText(text)
 
     def setSummaryText(self, text):
-        """set the description in the About box"""
+        """set the description in th
+        e About box"""
         self.description.setText(text)
 
     def setAuthorText(self, text):
@@ -126,7 +135,7 @@ class InfoBox(QtGui.QDialog):
         self.copyright.setText(text)
 
 
-def loadUi(ui_file, baseinstance=None, **kw):
+def myLoadUi(ui_file, baseinstance=None, **kw):
     '''
     load a .ui file for use in building a GUI
     
@@ -138,36 +147,5 @@ def loadUi(ui_file, baseinstance=None, **kw):
     
     inspired by:
     http://stackoverflow.com/questions/14892713/how-do-you-load-ui-files-onto-python-classes-with-pyside?lq=1
-    
-    .. rubric:: Basic Procedure
-
-    #. Use Qt Designer to create a .ui file.
-    #. Create a python class of the same type as the widget you created in the .ui file.
-    #. When initializing the python class, use uic to dynamically load the .ui file onto the class.
-
-    Here is an example:
-
-    .. code-block:: python
-        :linenos:
-
-        from PyQt4 import QtGui
-        import resources
-        
-        UI_FILE = 'plainTextEdit.ui'
-        
-        class TextWindow(QtGui.QDialog, form_class):
-        
-            def __init__(self, title, text):
-                QtGui.QDialog.__init__(self, parent)
-                resources.loadUi(UI_FILE, baseinstance=self)
-                self.setWindowTitle(title)
-                self.plainTextEdit.setPlainText(text)
-
-        import sys
-        app = QtGui.QApplication(sys.argv)
-        win = TextWindow('the title', __doc__)
-        win.show()
-        sys.exit(app.exec_())
-
     '''
-    return uic.loadUi(ui_file, baseinstance=baseinstance, **kw)
+    return uicLoadUi(ui_file, baseinstance=baseinstance, **kw)

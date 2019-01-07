@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2017-2019, UChicago Argonne, LLC.
+# See LICENSE.txt file for details.
+
 '''
 BcdaMenu: Creates a GUI menu button to start common software
 
@@ -183,9 +186,10 @@ class MainButtonWindow(QMainWindow):
 
     def about_box(self):
         '''display an About box'''
-        from bcdamenu import (__version__, __url__, __author__, 
+        from .__init__ import (__version__, __url__, __author__, 
                 __issues__, __copyright__, __license_url__)
         from . import about
+        print("DEBUG: about file:" + about.__file__)
         summary = __doc__.strip().splitlines()[0]  # 1st line only
         msg = summary
         msg += '\n  version: ' + __version__

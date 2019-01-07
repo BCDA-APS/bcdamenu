@@ -4,7 +4,7 @@ GUI menu button to start common software
 
 __project__     = u'BcdaMenu'
 __description__ = u"A GUI menu button to start common software."
-__copyright__   = u'2017-, UChicago Argonne, LLC'
+__copyright__   = u'2017-2019, UChicago Argonne, LLC'
 __authors__     = [u'Pete Jemian', ]
 __author__      = ', '.join(__authors__)
 __author_name__ = __authors__[0]
@@ -22,7 +22,7 @@ __zip_safe__    = False
 __package_name__ = __project__
 __long_description__    = __description__
 
-__keywords__            = ['APS', 'BCDA', 'PyQt4']
+__keywords__            = ['APS', 'BCDA', 'PyQt4', 'PyQt5']
 #__requires__            = ['PyQt4', 'pyepics']
 __install_requires__    = ()
 __documentation_mocks__ = []       # do NOT mock PyQt4 here, big problems if you do
