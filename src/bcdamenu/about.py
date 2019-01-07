@@ -61,12 +61,16 @@ class InfoBox(QDialog):
     '''
 
     def __init__(self, parent=None, settings=None):
+        from __init__ import __project__, __url__, __license_url__
+
         self.settings = settings
         QDialog.__init__(self, parent)
         myLoadUi(UI_FILE, baseinstance=self)
         
-        self.license_url = None
-        self.documentation_url = None
+        self.license_url = __license_url__
+        self.documentation_url = __url__
+        
+        self.setWindowTitle("About " + __project__)
 
         self.docs_pb.clicked.connect(self.doDocsUrl)
         self.issues_pb.clicked.connect(self.doIssuesUrl)
