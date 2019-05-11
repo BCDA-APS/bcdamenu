@@ -1,0 +1,49 @@
+{% set data = load_setup_py_data(setup_file='../setup.py', from_recipe_dir=True) %}
+{% set name = data.get('name') %}
+{% set version = data.get('version') %}
+{% set url = data.get('url') %}
+{% set description = data.get('description') %}
+{% set keywords = data.get('keywords') %}
+{% set license = data.get('license') %}
+
+source:
+  path: ../
+
+about:
+    home: "{{ url }}"
+    license_file: src/bcdamenu/LICENSE.txt
+    # see: https://github.com/conda/conda-build/blob/master/conda_build/license_family.py#L8-L23
+    license_family: OTHER
+    license: "{{ license }}"
+    summary: "{{ description }}"
+    keywords: "{{ keywords }}"
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+build:
+  script: python -m pip install --no-deps --ignore-installed .
+  noarch: python
+  entry_points:
+    - bcdamenu = bcdamenu.launcher:main
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - qt
+    - pyqt
+
+test:
+  imports:
+    - bcdamenu
+  commands:
+    - python -c "import bcdamenu;"
+    - bcdamenu --help
+
+extra:
+  recipe-maintainers:
+    - prjemian
