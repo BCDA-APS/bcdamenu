@@ -4,7 +4,7 @@ GUI menu button to start common software
 
 __project__     = u'BcdaMenu'
 __description__ = u"A GUI menu button to start common software."
-__copyright__   = u'2017-2019, UChicago Argonne, LLC'
+__copyright__   = u'2009-2019, UChicago Argonne, LLC'
 __authors__     = [u'Pete Jemian', ]
 __author__      = ', '.join(__authors__)
 __author_name__ = __authors__[0]

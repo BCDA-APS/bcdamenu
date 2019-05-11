@@ -14,7 +14,7 @@ Package Information
 
 * **author**        Pete R. Jemian
 * **email**         jemian@anl.gov
-* **copyright**     2017-, Pete R. Jemian
+* **copyright**     2009-2019, Pete R. Jemian
 * **license**       ANL OPEN SOURCE LICENSE (see `LICENSE.txt <http://BcdaMenu.readthedocs.io/en/latest/license.html>`_ file)
 * **documentation** http://bcdamenu.readthedocs.io
 * **source**        https://github.com/BCDA-APS/bcdamenu
