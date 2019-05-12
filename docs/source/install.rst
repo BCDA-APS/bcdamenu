@@ -23,8 +23,10 @@ Requirements
 
 .. index:: 
    requirements; Python 2.7
+   requirements; Python 3.6+
    requirements; Anaconda Python
    requirements; PyQt4
+   requirements; PyQt5
 
 * **Python 2.7**
 * **PyQt4**
@@ -37,3 +39,10 @@ This program was developed on a Windows workstation and tested
 with various Linux distributions (RHEL7, Linux Mint, Raspberry Pi).
 It is expected to run on any host that provides the standard 
 Python 2.7 packages *and* **PyQt4**.
+
+or
+
+* **Python 3.6+**
+* **PyQt5**
+
+Development and testing have progressed to include Python 3.6 or higher and PyQt5.
