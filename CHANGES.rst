@@ -7,6 +7,13 @@ Change History
 Production
 **********
 
+:2019.05.0:
+
+    * `#47 <https://github.com/prjemian/spec2nexus/issues/47>`_
+      fix About box for Qt5
+    * `#49 <https://github.com/prjemian/spec2nexus/issues/49>`_
+      create conda package (Qt5 only)
+
 :2017.9.0:
 
     * `#43 <https://github.com/prjemian/spec2nexus/issues/43>`_
