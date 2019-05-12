@@ -2,15 +2,18 @@
 
 ## PyPI upload
 
-Preceed the wildcard with tag text (with current version number `bcdamenu-2019.5.0*`)::
+Set the current release::
 
+	CURRENT_RELEASE=2019.05.0
+
+Build and upload to PyPI::
+	
 	python setup.py sdist bdist_wheel
-	twine upload dist/bcdamenu-${CURRENT_RELEASE}*
+	twine upload dist/BcdaMenu-${CURRENT_RELEASE}*
 
 ## Conda upload
 
-In the upload command below, use the text reported 
-at (near) the end of a successful conda build.
+Build and upload to anaconda.org.
 
 	conda build ./conda-recipe/
 	anaconda upload -u aps-anl-tag /home/mintadmin/Apps/anaconda/conda-bld/noarch/bcdamenu-${CURRENT_RELEASE}-py_0.tar.bz2
