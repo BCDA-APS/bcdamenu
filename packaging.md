@@ -1,5 +1,7 @@
 # Packaging Hints
 
+Check that both PyPI and Conda build first before uploading.
+
 ## PyPI upload
 
 Set the current release::
