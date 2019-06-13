@@ -35,7 +35,7 @@ except ImportError:
 
 try:
     import subprocess32 as subprocess
-except:
+except ModuleNotFoundError:
     import subprocess
 from . import config_file_parser
 

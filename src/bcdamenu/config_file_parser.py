@@ -21,7 +21,7 @@ parse the configuration file
 from collections import OrderedDict
 try:
     import configparser as iniParser
-except:
+except ModuleNotFoundError:
     import ConfigParser as iniParser
 
 TEST_FILE = "bcdamenu.ini"
