@@ -29,7 +29,7 @@ show the About box
 
 '''
 
-import os, sys
+import os
 try:
     from PyQt5.QtCore import QUrl
     from PyQt5.QtWidgets import QDialog
