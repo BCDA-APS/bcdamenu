@@ -11,9 +11,8 @@
 # The full license is in the file LICENSE, distributed with this software.
 #-----------------------------------------------------------------------------
 
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
-import re
 import sys
 
 import versioneer
@@ -43,7 +42,6 @@ setup (
     install_requires = bcdamenu.__install_requires__,
     package_dir      = {'': 'src'},
     packages         = ['bcdamenu', ],
-    #packages=find_packages(),
     package_data     = {
          'bcdamenu': [
             'bcdamenu.ini',
