@@ -35,7 +35,7 @@ except ImportError:
 
 try:
     import subprocess32 as subprocess
-except:
+except ModuleNotFoundError:
     import subprocess
 from . import config_file_parser
 
@@ -245,7 +245,7 @@ class MainButtonWindow(QMainWindow):
     def _build_menu(self, menu, widget):
         for k, v in menu.itemDict.items():
             if isinstance(v, config_file_parser.MenuItem):
-                action = widget.addAction(
+                widget.addAction(
                     v.label, 
                     partial(self.receiver, v.label, v.command))
             elif isinstance(v, config_file_parser.MenuSeparator):
